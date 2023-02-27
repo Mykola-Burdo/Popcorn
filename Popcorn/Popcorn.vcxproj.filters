@@ -19,6 +19,21 @@
     <Filter Include="Engine">
       <UniqueIdentifier>{39df5a3d-ed0f-4e41-95b5-1c0970938f2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ball">
+      <UniqueIdentifier>{92e3d0bd-ad4c-4bd7-9078-e9f3bb0fdaba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Level">
+      <UniqueIdentifier>{dfeb6fe7-0527-4eb4-bced-656e0d3e540d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bordel">
+      <UniqueIdentifier>{691b9669-1bf4-4d6e-9392-cfd710b35506}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{ef9d2909-066b-4032-9fb6-4f7b429604c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config">
+      <UniqueIdentifier>{cf938f67-c2e9-41ba-b7af-3a2cf426b6a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -35,6 +50,21 @@
     </ClInclude>
     <ClInclude Include="Engine.h">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Ball.h">
+      <Filter>Ball</Filter>
+    </ClInclude>
+    <ClInclude Include="Border.h">
+      <Filter>Bordel</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Level</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +86,21 @@
     </ClCompile>
     <ClCompile Include="Engine.cpp">
       <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Ball.cpp">
+      <Filter>Ball</Filter>
+    </ClCompile>
+    <ClCompile Include="Border.cpp">
+      <Filter>Bordel</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Config</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
