@@ -23,7 +23,7 @@ void AsEngine::Init(HWND hwnd)
    
    Platform.Redraw_Platform(Hwnd);
 
-   SetTimer(Hwnd, Timer_ID, 50, 0);
+   SetTimer(Hwnd, Timer_ID, 1000 / AsConfig::FPS, 0);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -80,6 +80,8 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 int AsEngine::On_Timer()
 {
    Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
+
+   Level.Active_Brick.Act(Hwnd);
 
    return 0;
 }

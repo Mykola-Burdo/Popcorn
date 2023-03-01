@@ -12,10 +12,10 @@ public:
    void Draw(HDC, RECT &, HPEN, HBRUSH);
    void Move(HWND, ALevel *, int, int);
 
+private:
    HPEN Ball_Pen;
    HBRUSH Ball_Brush;
 
-private:
    int Ball_X_Pos, Ball_Y_Pos;
    double Ball_Speed, Ball_Direction;
 
