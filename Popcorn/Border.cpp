@@ -13,20 +13,20 @@ void AsBorder::Init()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsBorder::Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush)
+void AsBorder::Draw(HDC hdc, RECT& paint_area)
 {// Draws a level border
 
    // Draw the left border
    for (int i = 0; i < 50; ++i)
-      Draw_Element(hdc, 2, 1 + i * 4, false, bg_pen, bg_brush);
+      Draw_Element(hdc, 2, 1 + i * 4, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
 
    // Draw the right border
    for (int i = 0; i < 50; ++i)
-      Draw_Element(hdc, 201, 1 + i * 4, false, bg_pen, bg_brush);
+      Draw_Element(hdc, 201, 1 + i * 4, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
 
    // Draw the top border
    for (int i = 0; i < 50; ++i)
-      Draw_Element(hdc, 3 + i * 4, 0, true, bg_pen, bg_brush);
+      Draw_Element(hdc, 3 + i * 4, 0, true, AsConfig::BG_Pen, AsConfig::BG_Brush);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -8,7 +8,7 @@ class AsBorder
 public:
    AsBorder();
    void Init();
-   void Draw(HDC, RECT &, HPEN, HBRUSH);
+   void Draw(HDC, RECT &);
 
 private:
    void Draw_Element(HDC, int, int y, bool, HPEN, HBRUSH);

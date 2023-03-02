@@ -20,7 +20,7 @@ char ALevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
 
 //--------------ALevel--------------------
 ALevel::ALevel()
-   : Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0), Level_Rect{}
+   : Active_Brick(EBrick_Type::EBT_Red), Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0), Level_Rect{}
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -28,8 +28,8 @@ void ALevel::Init()
 {
    Letter_Pen = CreatePen(PS_SOLID, AsConfig::Global_Scale, RGB(255, 255, 255));
 
-   AsConfig::Create_Pen_Brush(255, 85, 85, Brick_Red_Pen, Brick_Red_Brush);
-   AsConfig::Create_Pen_Brush(85, 255, 255, Brick_Blue_Pen, Brick_Blue_Brush);
+   AsConfig::Create_Pen_Brush(AsConfig::Red_Brick_Color, Brick_Red_Pen, Brick_Red_Brush);
+   AsConfig::Create_Pen_Brush(AsConfig::Blue_Brick_Color, Brick_Blue_Pen, Brick_Blue_Brush);
 
    Level_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
    Level_Rect.top = AsConfig::Level_Y_Offset * AsConfig::Global_Scale;
@@ -62,7 +62,7 @@ void ALevel::Check_Level_Brick_Hit(int& next_y_pos, double& ball_direction)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void ALevel::Draw(HDC hdc, RECT& paint_area)
+void ALevel::Draw(HWND hwnd, HDC hdc, RECT& paint_area)
 {// Output all bricks of the level
 
    RECT intersection_rect;

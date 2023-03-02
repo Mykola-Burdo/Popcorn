@@ -9,20 +9,13 @@ enum class ELetter_Type
    ELT_O
 };
 
-enum class EBrick_Type
-{
-   EBT_None = 0,
-   EBT_Red,
-   EBT_Blue
-};
-
 class ALevel
 {
 public:
    ALevel();
    void Init();
    void Check_Level_Brick_Hit(int &, double &);
-   void Draw(HDC, RECT &);
+   void Draw(HWND hwnd, HDC, RECT &);
 
    AActive_Brick Active_Brick;
 

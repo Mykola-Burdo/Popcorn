@@ -8,7 +8,7 @@ public:
    AsPlatform();
    void Init();
    void Redraw_Platform(HWND);
-   void Draw(HDC, HPEN, HBRUSH, RECT &);
+   void Draw(HDC, RECT &);
 
    int X_Pos;
    int X_Step;

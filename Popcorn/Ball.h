@@ -9,7 +9,7 @@ class ABall
 public:
    ABall();
    void Init();
-   void Draw(HDC, RECT &, HPEN, HBRUSH);
+   void Draw(HDC, RECT &);
    void Move(HWND, ALevel *, int, int);
 
 private:
