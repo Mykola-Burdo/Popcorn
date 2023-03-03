@@ -79,9 +79,13 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 
 int AsEngine::On_Timer()
 {
+   ++AsConfig::Current_Timer_Tick;
+
    Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
 
    Level.Active_Brick.Act(Hwnd);
+
+   Platform.Act(Hwnd);
 
    return 0;
 }
