@@ -12,12 +12,12 @@ AActive_Brick::AActive_Brick(EBrick_Type brick_type)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AActive_Brick::Act(HWND hwnd)
+void AActive_Brick::Act()
 {
 	if(Fade_Step < Max_Fade_Step - 1)
 	{
 		++Fade_Step;
-		InvalidateRect(hwnd, &Brick_Rect, FALSE);
+		InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
 	}
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------

@@ -24,6 +24,7 @@ public:
    static const AColor BG_Color, Red_Brick_Color, Blue_Brick_Color;
    static HPEN BG_Pen;
    static HBRUSH BG_Brush;
+   static HWND Hwnd;
 
 	static const int Global_Scale = 3;
    static const int Level_Width = 12; // Level width in cells

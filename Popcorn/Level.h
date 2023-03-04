@@ -15,7 +15,7 @@ public:
    ALevel();
    void Init();
    void Check_Level_Brick_Hit(int &, double &);
-   void Draw(HWND hwnd, HDC, RECT &);
+   void Draw(HDC, RECT &);
 
    AActive_Brick Active_Brick;
 

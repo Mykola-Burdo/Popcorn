@@ -10,7 +10,7 @@ public:
    ABall();
    void Init();
    void Draw(HDC, RECT &);
-   void Move(HWND, ALevel *, int, int);
+   void Move(ALevel *, int, int);
 
 private:
    HPEN Ball_Pen;
