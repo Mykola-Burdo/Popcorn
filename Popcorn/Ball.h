@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Config.h"
-#include "Level.h"
 
 enum class EBall_State
 {
@@ -24,11 +23,14 @@ public:
    ABall();
    void Init();
    void Draw(HDC, RECT &);
-   void Move(int, int, ALevel*, AHit_Checker *);
+   void Move();
    EBall_State Get_State();
    void Set_State(EBall_State, double);
 
+
    double Ball_Direction;
+
+   static void Add_Hit_Checker(AHit_Checker *);
 
    static const double Radius;
 
@@ -47,4 +49,6 @@ private:
    RECT Ball_Rect, Prev_Ball_Rect;
 
    static const double Start_Ball_Y_Pos;
+   static int Hit_Checkers_Count;
+   static AHit_Checker *Hit_Checkers[3];
 };

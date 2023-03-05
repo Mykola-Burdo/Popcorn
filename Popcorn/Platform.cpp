@@ -18,6 +18,21 @@ void AsPlatform::Init()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+{
+   // Correcting the position when reflected from the platform
+   if (next_y_pos + ball->Radius > AsConfig::Platform_Y_Pos)
+   {
+      if (next_x_pos + ball->Radius >= X_Pos && next_x_pos - ball->Radius <= (double)X_Pos + (double)Width)
+      {
+         ball->Ball_Direction = M_PI + (M_PI - ball->Ball_Direction);
+         return true;
+      }
+   }
+
+   return false;
+}
+
 void AsPlatform::Act()
 {
    switch(Platform_State)

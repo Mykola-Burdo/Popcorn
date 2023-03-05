@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Config.h"
 #include "Active_Brick.h"
+#include "Ball.h"
 
 enum class ELetter_Type
 {
@@ -9,12 +9,14 @@ enum class ELetter_Type
    ELT_O
 };
 
-class ALevel
+class ALevel : public AHit_Checker
 {
 public:
    ALevel();
+
+   virtual bool Check_Hit(double, double, ABall*);
+
    void Init();
-   void Check_Level_Brick_Hit(double &, double &);
    void Draw(HDC, RECT &);
 
    AActive_Brick Active_Brick;

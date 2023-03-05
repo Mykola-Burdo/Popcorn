@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "Ball.h"
 
 enum class EPlatform_State
 {
@@ -13,10 +13,13 @@ enum class EPlatform_State
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AsPlatform
+class AsPlatform : public AHit_Checker
 {
 public:
    AsPlatform();
+
+   virtual bool Check_Hit(double, double, ABall*);
+
    void Init();
    void Act();
    EPlatform_State Get_State();
