@@ -20,6 +20,7 @@ public:
 	static void Create_Pen_Brush(unsigned char, unsigned char, unsigned char, HPEN &, HBRUSH &);
    static int Rand(int);
 
+   static bool Level_Has_Floor;
    static int Current_Timer_Tick;
    static const AColor BG_Color, Red_Brick_Color, Blue_Brick_Color;
    static HPEN BG_Pen;

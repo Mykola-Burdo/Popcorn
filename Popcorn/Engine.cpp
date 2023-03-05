@@ -93,7 +93,7 @@ int AsEngine::On_Timer()
    switch (Game_State)
    {
    case EGame_State::EGS_Play_Level:
-      Ball.Move(&Level, Platform.X_Pos, Platform.Width);
+      Ball.Move(Platform.X_Pos, Platform.Width, &Level, &Border);
       
       if(Ball.Get_State() == EBall_State::EBS_Lost)
       {

@@ -30,6 +30,47 @@ void AsBorder::Draw(HDC hdc, RECT& paint_area)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+{
+   bool got_hit = false;
+
+   // Frame bounce position correction
+   if (next_x_pos - ball->Radius < AsConfig::Border_X_Offset)
+   {
+      got_hit = true;
+      ball->Ball_Direction = M_PI - ball->Ball_Direction;
+   }
+
+   if (next_y_pos - ball->Radius < AsConfig::Border_Y_Offset)
+   {
+      got_hit = true;
+      ball->Ball_Direction = -ball->Ball_Direction;
+   }
+
+   if (next_x_pos + ball->Radius > AsConfig::Max_X_Pos)
+   {
+      got_hit = true;
+      ball->Ball_Direction = M_PI - ball->Ball_Direction;
+   }
+
+   if (next_y_pos + ball->Radius > AsConfig::Max_Y_Pos)
+   {
+      if (AsConfig::Level_Has_Floor)
+      {
+         got_hit = true;
+         ball->Ball_Direction = -ball->Ball_Direction;
+      }
+      else
+      {
+         if (next_y_pos + ball->Radius > (double)AsConfig::Max_Y_Pos + (double)AsConfig::Ball_Size * 4.0) // In order for the ball to fly below the floor, we check its max_y_pos below the visible border
+            ball->Set_State(EBall_State::EBS_Lost, next_x_pos);
+      }
+   }
+
+   return got_hit;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 void AsBorder::Draw_Element(HDC hdc, int x, int y, bool is_top_border, HPEN bg_pen, HBRUSH bg_brush)
 {// Draws a level border element
 

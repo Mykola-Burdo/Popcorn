@@ -1,12 +1,15 @@
 #pragma once
 
-#include "Config.h"
+#include "Ball.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
-class AsBorder
+class AsBorder : public AHit_Checker
 {
 public:
    AsBorder();
+
+   virtual bool Check_Hit(double, double, ABall *);
+
    void Init();
    void Draw(HDC, RECT &);
 

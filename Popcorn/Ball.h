@@ -9,17 +9,28 @@ enum class EBall_State
    EBS_Lost,
    EBS_On_Platform
 };
-
 //-----------------------------------------------------------------------------------------------------------------------------------------------
+class ABall;
+class AHit_Checker
+{
+public:
+   virtual bool Check_Hit(double, double, ABall *) = 0;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 class ABall
 {
 public:
    ABall();
    void Init();
    void Draw(HDC, RECT &);
-   void Move(ALevel *, int, int);
+   void Move(int, int, ALevel*, AHit_Checker *);
    EBall_State Get_State();
-   void Set_State(EBall_State, int);
+   void Set_State(EBall_State, double);
+
+   double Ball_Direction;
+
+   static const double Radius;
 
 private:
    void Redraw_Ball();
@@ -29,9 +40,9 @@ private:
    HPEN Ball_Pen;
    HBRUSH Ball_Brush;
 
-   double Ball_X_Pos, Ball_Y_Pos;
-   double Ball_Direction;
+   double Center_X_Pos, Center_Y_Pos;
    double Ball_Speed;
+   double Rest_Distance;
 
    RECT Ball_Rect, Prev_Ball_Rect;
 
