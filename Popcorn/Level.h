@@ -14,9 +14,10 @@ class ALevel
 public:
    ALevel();
    void Init();
-   void Check_Level_Brick_Hit(int &, double &);
+   void Check_Level_Brick_Hit(double &, double &);
    void Draw(HDC, RECT &);
 
+   bool Has_Floor;
    AActive_Brick Active_Brick;
 
 private:
