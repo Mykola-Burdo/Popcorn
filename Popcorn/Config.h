@@ -38,7 +38,6 @@ public:
    static const int Level_Y_Offset = 6;
    static const int Border_X_Offset = 6;
    static const int Border_Y_Offset = 4;
-   static const int Ball_Size = 4;
    static const int Max_X_Pos = Level_X_Offset + Cell_Width * Level_Width;
    static const int Max_Y_Pos = 199;
    static const int Platform_Y_Pos = 185;

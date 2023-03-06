@@ -38,19 +38,19 @@ bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
    if (next_x_pos - ball->Radius < AsConfig::Border_X_Offset)
    {
       got_hit = true;
-      ball->Ball_Direction = M_PI - ball->Ball_Direction;
+      ball->Reflect(false);
    }
 
    if (next_y_pos - ball->Radius < AsConfig::Border_Y_Offset)
    {
       got_hit = true;
-      ball->Ball_Direction = -ball->Ball_Direction;
+      ball->Reflect(true);
    }
 
    if (next_x_pos + ball->Radius > AsConfig::Max_X_Pos)
    {
       got_hit = true;
-      ball->Ball_Direction = M_PI - ball->Ball_Direction;
+      ball->Reflect(false);
    }
 
    if (next_y_pos + ball->Radius > AsConfig::Max_Y_Pos)
@@ -58,11 +58,11 @@ bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
       if (AsConfig::Level_Has_Floor)
       {
          got_hit = true;
-         ball->Ball_Direction = -ball->Ball_Direction;
+         ball->Reflect(true);
       }
       else
       {
-         if (next_y_pos + ball->Radius > (double)AsConfig::Max_Y_Pos + (double)AsConfig::Ball_Size * 4.0) // In order for the ball to fly below the floor, we check its max_y_pos below the visible border
+         if (next_y_pos + ball->Radius > (double)AsConfig::Max_Y_Pos + ball->Radius * 4.0) // In order for the ball to fly below the floor, we check its max_y_pos below the visible border
             ball->Set_State(EBall_State::EBS_Lost, next_x_pos);
       }
    }
