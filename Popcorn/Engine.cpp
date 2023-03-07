@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-   : Game_State(EGame_State::EGS_Play_Level)
+   : Game_State(EGame_State::EGS_Test_Ball)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,7 +23,9 @@ void AsEngine::Init(HWND hwnd)
    ABall::Add_Hit_Checker(&Level);
    ABall::Add_Hit_Checker(&Platform);
 
-   Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
+   Level.Set_Current_Level(ALevel::Test_Level);
+
+   //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
 
    Platform.Set_State(EPlatform_State::EPS_Normal);
    
@@ -96,6 +98,12 @@ int AsEngine::On_Timer()
 
    switch (Game_State)
    {
+   case EGame_State::EGS_Test_Ball:
+      Ball.Set_For_Test();
+      Game_State = EGame_State::EGS_Play_Level;
+      break;
+
+
    case EGame_State::EGS_Play_Level:
       Ball.Move();
       
@@ -104,6 +112,9 @@ int AsEngine::On_Timer()
          Game_State = EGame_State::EGS_Lost_Ball;
          Platform.Set_State(EPlatform_State::EPS_Meltdown);
       }
+
+      if(Ball.Is_Test_Finished())
+         Game_State = EGame_State::EGS_Test_Ball;
       break;
 
 

@@ -24,8 +24,10 @@ public:
    void Init();
    void Draw(HDC, RECT &);
    void Move();
+   void Set_For_Test();
+   bool Is_Test_Finished();
    EBall_State Get_State();
-   void Set_State(EBall_State, double);
+   void Set_State(EBall_State, double, double y_pos = Start_Ball_Y_Pos);
    double Get_Direction();
    void Set_Direction(double);
    void Reflect(bool);
@@ -46,6 +48,10 @@ private:
    double Ball_Speed;
    double Rest_Distance;
    double Ball_Direction;
+
+   bool Testing_Is_Active;
+   int Test_Iteration;
+   double Rest_Test_Distance;
 
    RECT Ball_Rect, Prev_Ball_Rect;
 
