@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-   : Game_State(EGame_State::EGS_Test_Ball)
+   : Game_State(EGame_State::EGS_Play_Level)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,9 +23,9 @@ void AsEngine::Init(HWND hwnd)
    ABall::Add_Hit_Checker(&Level);
    ABall::Add_Hit_Checker(&Platform);
 
-   Level.Set_Current_Level(ALevel::Test_Level);
+   Level.Set_Current_Level(ALevel::Level_01);
 
-   //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
+   Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
 
    Platform.Set_State(EPlatform_State::EPS_Normal);
    
@@ -47,11 +47,11 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
    }
    */
 
-   Ball.Draw(hdc, paint_area);
-
    Border.Draw(hdc, paint_area);
 
    Platform.Draw(hdc, paint_area);
+
+   Ball.Draw(hdc, paint_area);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

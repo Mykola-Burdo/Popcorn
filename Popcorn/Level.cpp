@@ -54,7 +54,7 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
    bool  got_horizontal_hit, got_vertical_hit;
    double horizontsl_reflection_pos, vertical_reflection_pos;
 
-   if(next_y_pos > AsConfig::Level_Y_Offset + (AsConfig::Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height)
+   if(next_y_pos + ball->Radius > AsConfig::Level_Y_Offset + (AsConfig::Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height)
       return false;
 
    direction = ball->Get_Direction();
@@ -156,8 +156,9 @@ bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, int level_
 {
    double direction = ball->Get_Direction();
 
-   // Checking if it hits the bottom
-   if (direction >= 0.0 && direction < M_PI)
+   if (ball->Is_Moving_Up())
+   {// Checking if it hits the bottom
+
       if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Low_Y, next_x_pos, Current_Brick_Left_X, Current_Brick_Right_X, ball->Radius, reflection_pos))
       {
          // Checking the possibility of a bounce down
@@ -166,9 +167,10 @@ bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, int level_
          else
             return false;
       }
+   }
+   else
+   {// Checking if it hits the top
 
-   // Checking if it hits the top
-   if (direction >= M_PI && direction <= 2.0 * M_PI)
       if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Top_Y, next_x_pos, Current_Brick_Left_X, Current_Brick_Right_X, ball->Radius, reflection_pos))
       {
          // Checking the possibility of a bounce up
@@ -177,6 +179,7 @@ bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, int level_
          else
             return false;
       }
+   }
 
    return false;
 }
@@ -186,8 +189,9 @@ bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, int leve
 {
    double direction = ball->Get_Direction();
 
-   // Checking the hit on the left side
-   if (direction >= 0.0 && direction < M_PI_2 || direction >= M_PI + M_PI_2 && direction <= 2.0 * M_PI)
+   if (!ball->Is_Moving_Left())
+   {// Checking the hit on the left side
+
       if (Hit_Circle_On_Line(Current_Brick_Left_X - next_x_pos, next_y_pos, Current_Brick_Top_Y, Current_Brick_Low_Y, ball->Radius, reflection_pos))
       {
          // Checking the possibility of a rebound to the left
@@ -196,9 +200,10 @@ bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, int leve
          else
             return false;
       }
+   }
+   else
+   {// Checking the hit on the right side
 
-   // Checking the hit on the right side
-   if (direction >= M_PI_2 && direction < M_PI + M_PI_2)
       if (Hit_Circle_On_Line(Current_Brick_Right_X - next_x_pos, next_y_pos, Current_Brick_Top_Y, Current_Brick_Low_Y, ball->Radius, reflection_pos))
       {
          // Checking the possibility of a rebound to the right
@@ -207,32 +212,11 @@ bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, int leve
          else
             return false;
       }
+   }
 
    return false;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
-
-bool ALevel::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double &x)
-{// Checks the intersection of a horizontal segment (passing from left_x to right_x through y) with a circle of radius radius
-
-   double min_x, max_x;
-
-   if (y > radius)
-      return false;
-
-   x = sqrt(pow(radius, 2) - pow(y, 2));
-
-   max_x = next_x_pos + x;
-   min_x = next_x_pos - x;
-
-   if (max_x >= left_x && max_x <= right_x
-      || min_x >= left_x && min_x <= right_x)
-      return true;
-   else
-      return false;
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 {// The conclusion of the "brick"

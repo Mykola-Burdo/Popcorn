@@ -28,7 +28,6 @@ public:
 private:
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
-   bool Hit_Circle_On_Line(double, double, double, double, double, double &);
    void Draw_Brick(HDC, int, int, EBrick_Type);
    void Set_Brick_Letter_Colors(bool, HPEN &, HBRUSH &, HPEN &, HBRUSH &);
    void Draw_Brick_Letter(HDC, int, int, int, EBrick_Type, ELetter_Type);

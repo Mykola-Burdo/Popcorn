@@ -14,6 +14,7 @@ class AHit_Checker
 {
 public:
    virtual bool Check_Hit(double, double, ABall *) = 0;
+   bool Hit_Circle_On_Line(double, double, double, double, double, double &);
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -31,8 +32,12 @@ public:
    double Get_Direction();
    void Set_Direction(double);
    void Reflect(bool);
+   bool Is_Moving_Up(); 
+   bool Is_Moving_Left();
 
    static void Add_Hit_Checker(AHit_Checker *);
+
+   double Ball_Speed;
 
    static const double Radius;
 
@@ -45,7 +50,6 @@ private:
    HBRUSH Ball_Brush;
 
    double Center_X_Pos, Center_Y_Pos;
-   double Ball_Speed;
    double Rest_Distance;
    double Ball_Direction;
 

@@ -10,20 +10,35 @@ AsPlatform::AsPlatform()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsPlatform::Init()
+bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall* ball)
 {
-   Highlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
-   AsConfig::Create_Pen_Brush(151, 0, 0, Platform_Circle_Pen, Platform_Circle_Brush);
-   AsConfig::Create_Pen_Brush(0, 128, 192, Platform_Inner_Pen, Platform_Inner_Brush);
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
+   double inner_left_x, inner_right_x;
+   double inner_top_y, inner_low_y;
+   double reflection_pos;
 
-bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
-{
    // Correcting the position when reflected from the platform
-   if (next_y_pos + ball->Radius > AsConfig::Platform_Y_Pos)
+   if (next_y_pos + ball->Radius < AsConfig::Platform_Y_Pos)
+      return false;
+
+   inner_top_y = (double)(AsConfig::Platform_Y_Pos - 1);
+   inner_low_y = (double)(AsConfig::Platform_Y_Pos + Height - 1);
+   inner_left_x = (double)(X_Pos + Circle_Size - 1);
+   inner_right_x = (double)(X_Pos + Width - (Circle_Size - 1));
+
+   // Checking the reflection from the central part of the platform
+   if(ball->Is_Moving_Up())
    {
-      if (next_x_pos + ball->Radius >= X_Pos && next_x_pos - ball->Radius <= (double)X_Pos + (double)Width)
+      // From the bottom edge
+      if (Hit_Circle_On_Line(next_y_pos - inner_low_y, next_x_pos, inner_left_x, inner_right_x, ball->Radius, reflection_pos))
+      {
+         ball->Reflect(true);
+         return true;
+      }
+   }
+   else
+   {
+      // From top edge
+      if (Hit_Circle_On_Line(next_y_pos - inner_top_y, next_x_pos, inner_left_x, inner_right_x, ball->Radius, reflection_pos))
       {
          ball->Reflect(true);
          return true;
@@ -32,6 +47,15 @@ bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 
    return false;
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Init()
+{
+   Highlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
+   AsConfig::Create_Pen_Brush(151, 0, 0, Platform_Circle_Pen, Platform_Circle_Brush);
+   AsConfig::Create_Pen_Brush(0, 128, 192, Platform_Inner_Pen, Platform_Inner_Brush);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 void AsPlatform::Act()
 {

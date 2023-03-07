@@ -1,5 +1,27 @@
 #include "Ball.h"
 
+//--------------AHit_Checker--------------------
+bool AHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double& x)
+{// Checks the intersection of a horizontal segment (passing from left_x to right_x through y) with a circle of radius radius
+
+   double min_x, max_x;
+
+   if (y > radius)
+      return false;
+
+   x = sqrt(pow(radius, 2) - pow(y, 2));
+
+   max_x = next_x_pos + x;
+   min_x = next_x_pos - x;
+
+   if (max_x >= left_x && max_x <= right_x
+      || min_x >= left_x && min_x <= right_x)
+      return true;
+   else
+      return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 //--------------ABall--------------------
 const double ABall::Start_Ball_Y_Pos = 181.0;
 const double ABall::Radius = 2.0;
@@ -180,6 +202,24 @@ void ABall::Reflect(bool fron_horizontal)
       Set_Direction(-Ball_Direction);
    else
       Set_Direction(M_PI - Ball_Direction);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ABall::Is_Moving_Up()
+{
+   if (Ball_Direction >= 0.0 && Ball_Direction < M_PI)
+      return true;
+   else 
+      return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ABall::Is_Moving_Left()
+{
+   if (Ball_Direction >= M_PI_2 && Ball_Direction < M_PI + M_PI_2)
+      return true;
+   else
+      return false;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
