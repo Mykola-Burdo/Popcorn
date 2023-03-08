@@ -18,7 +18,7 @@ class AsPlatform : public AHit_Checker
 public:
    AsPlatform();
 
-   virtual bool Check_Hit(double, double, ABall*);
+   virtual bool Check_Hit(double, double, ABall *);
 
    void Init();
    void Act();
@@ -38,6 +38,7 @@ private:
    void Draw_Meltdown_State(HDC, RECT &);
    void Draw_Roll_In_State(HDC, RECT &);
    void Draw_Expanding_Roll_In_State(HDC, RECT &);
+   bool Reflect_On_Circle(double, double, double, ABall *);
 
    EPlatform_State Platform_State;
    int Inner_Width;

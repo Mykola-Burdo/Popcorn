@@ -24,7 +24,7 @@ bool AHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x
 
 //--------------ABall--------------------
 const double ABall::Start_Ball_Y_Pos = 181.0;
-const double ABall::Radius = 2.0;
+const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
 int ABall::Hit_Checkers_Count = 0;
 AHit_Checker *ABall::Hit_Checkers[] = {};
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
       SelectObject(hdc, AsConfig::BG_Pen);
       SelectObject(hdc, AsConfig::BG_Brush);
 
-      Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
+      Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
    }
 
    if(Ball_State == EBall_State::EBS_Lost)
@@ -64,7 +64,7 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
       SelectObject(hdc, Ball_Pen);
       SelectObject(hdc, Ball_Brush);
 
-      Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right - 1, Ball_Rect.bottom - 1);
+      Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,6 @@ void ABall::Move()
 {
    bool got_hit;
    double next_x_pos, next_y_pos;
-   double step_size = 1.0 / AsConfig::Global_Scale;
 
    if(Ball_State != EBall_State::EBS_Normal)
       return;
@@ -81,12 +80,12 @@ void ABall::Move()
    Prev_Ball_Rect = Ball_Rect;
    Rest_Distance += Ball_Speed;
 
-   while(Rest_Distance >= step_size)
+   while(Rest_Distance >= AsConfig::Moving_Step_Size)
    {
       got_hit = false;
 
-      next_x_pos = Center_X_Pos + step_size * cos(Ball_Direction);
-      next_y_pos = Center_Y_Pos - step_size * sin(Ball_Direction);
+      next_x_pos = Center_X_Pos + AsConfig::Moving_Step_Size * cos(Ball_Direction);
+      next_y_pos = Center_Y_Pos - AsConfig::Moving_Step_Size * sin(Ball_Direction);
 
       // Correcting the position when reflected from all surfaces
       for(int i= 0; i < Hit_Checkers_Count; ++i)
@@ -95,13 +94,13 @@ void ABall::Move()
       if(!got_hit)
       {
          // The ball continues to move if it did not interact with other objects
-         Rest_Distance -= step_size;
+         Rest_Distance -= AsConfig::Moving_Step_Size;
 
          Center_X_Pos = next_x_pos;
          Center_Y_Pos = next_y_pos;
 
          if(Testing_Is_Active)
-            Rest_Test_Distance -= step_size;
+            Rest_Test_Distance -= AsConfig::Moving_Step_Size;
       }
    }
 

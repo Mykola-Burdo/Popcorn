@@ -27,6 +27,8 @@ public:
    static HBRUSH BG_Brush;
    static HWND Hwnd;
 
+   static const double Moving_Step_Size;
+
 	static const int Global_Scale = 3;
    static const int Level_Width = 12; // Level width in cells
    static const int Level_Height = 14; // Level height in cells

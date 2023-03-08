@@ -47,7 +47,7 @@ bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
       ball->Reflect(true);
    }
 
-   if (next_x_pos + ball->Radius > AsConfig::Max_X_Pos)
+   if (next_x_pos + ball->Radius > AsConfig::Max_X_Pos + 1)
    {
       got_hit = true;
       ball->Reflect(false);
