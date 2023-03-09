@@ -137,7 +137,7 @@ int AsEngine::On_Timer()
 
    Platform.Act();
 
-   //Level.Active_Brick.Act();
+   Level.Act();
 
    return 0;
 }

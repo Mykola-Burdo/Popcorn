@@ -4,7 +4,7 @@
 
 enum class EPlatform_State
 {
-   EPS_Missing = 0,
+   EPS_Missing,
    EPS_Ready,
    EPS_Normal,
    EPS_Meltdown,

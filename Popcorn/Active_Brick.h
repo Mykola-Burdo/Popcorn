@@ -4,18 +4,28 @@
 
 enum class EBrick_Type
 {
-	EBT_None = 0,
+	EBT_None,
+
 	EBT_Red,
-	EBT_Blue
+	EBT_Blue,
+	EBT_Unbreakable,
+	EBT_Multihit_1,
+	EBT_Multihit_2,
+	EBT_Multihit_3,
+	EBT_Multihit_4,
+	EBT_Parachute,
+	EBT_Teleport,
+	EBT_Ad
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 class AActive_Brick
 {
 public:
-	AActive_Brick(EBrick_Type);
+	AActive_Brick(EBrick_Type, int, int);
 	void Act();
 	void Draw(HDC, RECT &);
+	bool Is_Finished();
 
 	static void Setup_Colors();
 

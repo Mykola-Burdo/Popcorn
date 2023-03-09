@@ -38,7 +38,7 @@ char ALevel::Test_Level[AsConfig::Level_Height][AsConfig::Level_Width] =
 
 //--------------ALevel--------------------
 ALevel::ALevel()
-   : Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0), Level_Rect{}
+   : Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0), Level_Rect{}, Active_Bricks_Count(0)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,8 +51,8 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
    double min_ball_y, max_ball_y;
    int min_level_x, max_level_x;
    int min_level_y, max_level_y;
-   bool  got_horizontal_hit, got_vertical_hit;
-   double horizontsl_reflection_pos, vertical_reflection_pos;
+   bool got_horizontal_hit, got_vertical_hit;
+   double horizontal_reflection_pos, vertical_reflection_pos;
 
    if(next_y_pos + ball->Radius > AsConfig::Level_Y_Offset + (AsConfig::Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height)
       return false;
@@ -82,16 +82,18 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
          Current_Brick_Left_X = AsConfig::Level_X_Offset + j * AsConfig::Cell_Width;
          Current_Brick_Right_X = Current_Brick_Left_X + AsConfig::Brick_Width;
 
-         got_horizontal_hit = Check_Horizontal_Hit(next_x_pos, next_y_pos, j, i, ball, horizontsl_reflection_pos);
+         got_horizontal_hit = Check_Horizontal_Hit(next_x_pos, next_y_pos, j, i, ball, horizontal_reflection_pos);
 
          got_vertical_hit = Check_Vertical_Hit(next_x_pos, next_y_pos, j, i, ball, vertical_reflection_pos);
 
          if(got_horizontal_hit && got_vertical_hit)
          {
-            if(vertical_reflection_pos < horizontsl_reflection_pos)
+            if(vertical_reflection_pos < horizontal_reflection_pos)
                ball->Reflect(true);
             else
                ball->Reflect(false);
+
+            Add_Active_Brick(j, i);
 
             return true;
          }
@@ -99,12 +101,14 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
             if(got_horizontal_hit)
             {
                ball->Reflect(false);
+               Add_Active_Brick(j, i);
                return true;
             }
             else
                if(got_vertical_hit)
                {
                   ball->Reflect(true);
+                  Add_Active_Brick(j, i);
                   return true;
                }
       }
@@ -127,12 +131,32 @@ void ALevel::Init()
    Level_Rect.bottom = Level_Rect.top + AsConfig::Cell_Height * AsConfig::Level_Height * AsConfig::Global_Scale;
 
    memset(Current_Level, 0, sizeof(Current_Level));
+   memset(Active_Bricks, 0, sizeof(Active_Bricks));
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 void ALevel::Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Level_Width])
 {
    memcpy(Current_Level, level, sizeof(Current_Level));
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALevel::Act()
+{
+   for (int i = 0; i < AsConfig::Max_Active_Bricks_Count; ++i)
+   {
+      if (Active_Bricks[i] != 0)
+      {
+         Active_Bricks[i]->Act();
+
+         if(Active_Bricks[i]->Is_Finished())
+         {
+            delete Active_Bricks[i];
+            Active_Bricks[i] = 0;
+            --Active_Bricks_Count;
+         }
+      }
+   }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -148,7 +172,73 @@ void ALevel::Draw(HDC hdc, RECT& paint_area)
       for (int j = 0; j < AsConfig::Level_Width; ++j)
          Draw_Brick(hdc, AsConfig::Level_X_Offset + j * AsConfig::Cell_Width, AsConfig::Level_Y_Offset + i * AsConfig::Cell_Height, (EBrick_Type)Current_Level[i][j]);
 
-   //Active_Brick.Draw(hdc, paint_area);
+   for (int i = 0; i < AsConfig::Max_Active_Bricks_Count; ++i)
+   {
+      if(Active_Bricks[i] != 0)
+         Active_Bricks[i]->Draw(hdc, paint_area);
+   }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALevel::Add_Active_Brick(int brick_x, int brick_y)
+{
+   EBrick_Type brick_type;
+   AActive_Brick *active_brick;
+
+   if (Active_Bricks_Count >= AsConfig::Max_Active_Bricks_Count)
+      return; // There are too many active bricks!
+
+   brick_type = (EBrick_Type)Current_Level[brick_y][brick_x];
+
+   switch (brick_type)
+   {
+   case EBrick_Type::EBT_None:
+      return;
+
+   case EBrick_Type::EBT_Red:
+   case EBrick_Type::EBT_Blue:
+      active_brick = new AActive_Brick(brick_type, brick_x, brick_y);
+      break;
+/*
+   case EBrick_Type::EBT_Unbreakable:
+      break;
+
+   case EBrick_Type::EBT_Multihit_1:
+      break;
+
+   case EBrick_Type::EBT_Multihit_2:
+      break;
+
+   case EBrick_Type::EBT_Multihit_3:
+      break;
+
+   case EBrick_Type::EBT_Multihit_4:
+      break;
+
+   case EBrick_Type::EBT_Parachute:
+      break;
+
+   case EBrick_Type::EBT_Teleport:
+      break;
+
+   case EBrick_Type::EBT_Ad:
+      break;
+*/
+   default:
+      return;
+
+   }
+
+   // Adding a new active brick to the first free space
+   for(int i = 0; i < AsConfig::Max_Active_Bricks_Count; ++i)
+   {
+      if(Active_Bricks[i] == 0)
+      {
+         Active_Bricks[i] = active_brick;
+         ++Active_Bricks_Count;
+         break;
+      }
+   }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -207,7 +297,7 @@ bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, int leve
       if (Hit_Circle_On_Line(Current_Brick_Right_X - next_x_pos, next_y_pos, Current_Brick_Top_Y, Current_Brick_Low_Y, ball->Radius, reflection_pos))
       {
          // Checking the possibility of a rebound to the right
-         if (level_y < AsConfig::Level_Width - 1 && Current_Level[level_y][level_x + 1] == 0)
+         if (level_x < AsConfig::Level_Width - 1 && Current_Level[level_y][level_x + 1] == 0)
             return true;
          else
             return false;
