@@ -8,6 +8,20 @@ enum class ELetter_Type
    ELT_None = 0,
    ELT_O
 };
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AFalling_Letter
+{
+public:
+   AFalling_Letter(ELetter_Type);
+
+   const ELetter_Type Letter_Type;
+
+private:
+   void Set_Brick_Letter_Colors(bool, HPEN&, HBRUSH &, HPEN &, HBRUSH &);
+   void Draw_Brick_Letter(HDC, int, int, int, EBrick_Type, ELetter_Type);
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 class ALevel : public AHit_Checker
 {
@@ -27,15 +41,12 @@ public:
    static char Test_Level[AsConfig::Level_Height][AsConfig::Level_Width];
 
 private:
-   void Add_Active_Brick(int, int);
+   void On_Hit(int, int);
+   bool Add_Falling_Letter(int, int, EBrick_Type);
+   void Add_Active_Brick(int, int, EBrick_Type);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
    void Draw_Brick(HDC, int, int, EBrick_Type);
-   void Set_Brick_Letter_Colors(bool, HPEN &, HBRUSH &, HPEN &, HBRUSH &);
-   void Draw_Brick_Letter(HDC, int, int, int, EBrick_Type, ELetter_Type);
-
-   HPEN Letter_Pen, Brick_Red_Pen, Brick_Blue_Pen;
-   HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
 
    RECT Level_Rect;
 
@@ -44,5 +55,7 @@ private:
 
    char Current_Level[AsConfig::Level_Height][AsConfig::Level_Width];
    int Active_Bricks_Count;
-   AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count];
+   AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count]; 
+   int Falling_Letters_Count;
+   AFalling_Letter * Falling_Letters[AsConfig::Max_Falling_Letters_Count];
 };
