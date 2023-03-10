@@ -38,6 +38,8 @@ void AsEngine::Init(HWND hwnd)
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 {// Drawing the game screen
 
+   SetGraphicsMode(hdc, GM_ADVANCED);
+
    Level.Draw(hdc, paint_area);
 
    /*

@@ -13,13 +13,27 @@ enum class ELetter_Type
 class AFalling_Letter
 {
 public:
-   AFalling_Letter(ELetter_Type);
+   AFalling_Letter(EBrick_Type, ELetter_Type, int, int);
 
+   void Act();
+   void Draw(HDC, RECT&);
+   bool Is_Finished();
+
+   const EBrick_Type Brick_Type;
    const ELetter_Type Letter_Type;
 
+   bool Got_Hit;
+
 private:
-   void Set_Brick_Letter_Colors(bool, HPEN&, HBRUSH &, HPEN &, HBRUSH &);
-   void Draw_Brick_Letter(HDC, int, int, int, EBrick_Type, ELetter_Type);
+   void Set_Brick_Letter_Colors(bool, HPEN &, HBRUSH &, HPEN &, HBRUSH &);
+   void Draw_Brick_Letter(HDC);
+
+   int X, Y;
+   int Rotation_Step;
+   int Next_Rotation_Tick;
+   RECT Letter_Cell, Prev_Letter_Cell;
+
+   static const int Ticks_Per_Step = 4;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

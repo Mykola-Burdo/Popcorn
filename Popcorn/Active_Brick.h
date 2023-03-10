@@ -23,6 +23,7 @@ class AActive_Brick
 {
 public:
 	AActive_Brick(EBrick_Type, int, int);
+
 	void Act();
 	void Draw(HDC, RECT &);
 	bool Is_Finished();
