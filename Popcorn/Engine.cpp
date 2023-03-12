@@ -42,13 +42,6 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 
    Level.Draw(hdc, paint_area);
 
-   /*
-   for (int i = 0; i < 16; ++i)
-   {
-      Draw_Brick_Letter(hdc, 650, (AsConfig::Level_Y_Offset + 36) + i * AsConfig::Cell_Height * AsConfig::Global_Scale, i, EBrick_Type::EBT_Red, ELetter_Type::ELT_O);
-   }
-   */
-
    Border.Draw(hdc, paint_area);
 
    Platform.Draw(hdc, paint_area);

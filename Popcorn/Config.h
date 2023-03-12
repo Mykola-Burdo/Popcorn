@@ -8,6 +8,8 @@ class AColor
 {
 public:
    AColor(unsigned char, unsigned char, unsigned char);
+
+   int Get_RGB() const;
    unsigned char R, G, B;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
