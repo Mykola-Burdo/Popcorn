@@ -63,22 +63,20 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
    switch (key_type)
    {
    case EKey_Type::EKT_Left:
-      Platform.X_Pos -= Platform.X_Step;
-
-      if (Platform.X_Pos <= AsConfig::Border_X_Offset)
-         Platform.X_Pos = AsConfig::Border_X_Offset;
-
-      Platform.Redraw_Platform();
+      Platform.Move(true);
       break;
 
 
    case EKey_Type::EKT_Right:
-      Platform.X_Pos += Platform.X_Step;
+      /*Platform.X_Pos += Platform.X_Step;
 
       if (Platform.X_Pos >= AsConfig::Max_X_Pos - Platform.Width + 1)
          Platform.X_Pos = AsConfig::Max_X_Pos - Platform.Width + 1;
 
-      Platform.Redraw_Platform();
+      Platform.Redraw_Platform();*/
+
+      Platform.Move(false);
+
       break;
 
 

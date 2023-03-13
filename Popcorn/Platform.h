@@ -27,6 +27,7 @@ public:
    void Set_State(EPlatform_State);
    void Redraw_Platform();
    void Draw(HDC, RECT &);
+   void Move(bool);
 
    int X_Pos;
    int X_Step;
