@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ball.h"
+#include "Falling_Letter.h"
 
 enum class EPlatform_State
 {
@@ -28,6 +29,7 @@ public:
    void Redraw_Platform();
    void Draw(HDC, RECT &);
    void Move(bool);
+   bool Hit_By(AFalling_Letter *);
 
    int X_Pos;
    int X_Step;

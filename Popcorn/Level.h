@@ -3,10 +3,10 @@
 #include "Falling_Letter.h"
 #include "Ball.h"
 
-class ALevel : public AHit_Checker
+class AsLevel : public AHit_Checker
 {
 public:
-   ALevel();
+   AsLevel();
 
    virtual bool Check_Hit(double, double, ABall*);
 
@@ -14,6 +14,7 @@ public:
    void Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Level_Width]);
    void Act();
    void Draw(HDC, RECT &);
+   bool Get_Next_Falling_Letter(int &, AFalling_Letter **);
 
    //AActive_Brick Active_Brick;
 
