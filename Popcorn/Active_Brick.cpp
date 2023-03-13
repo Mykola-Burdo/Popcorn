@@ -18,7 +18,7 @@ AActive_Brick::AActive_Brick(EBrick_Type brick_type, int level_x, int level_y)
 
 void AActive_Brick::Act()
 {
-	if(Fade_Step < Max_Fade_Step - 1)
+	if (Fade_Step < Max_Fade_Step - 1)
 	{
 		++Fade_Step;
 		InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
@@ -31,7 +31,7 @@ void AActive_Brick::Draw(HDC hdc, RECT &paint_area)
 	HPEN pen = 0;
 	HBRUSH brush = 0;
 
-	switch(Brick_Type)
+	switch (Brick_Type)
 	{
 	case EBrick_Type::EBT_Red:
 		pen = Fading_Red_Brick_Pens[Fade_Step];
@@ -47,7 +47,7 @@ void AActive_Brick::Draw(HDC hdc, RECT &paint_area)
 	SelectObject(hdc, pen);
 	SelectObject(hdc, brush);
 
-	RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right, Brick_Rect.bottom, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
+	RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right - 1, Brick_Rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

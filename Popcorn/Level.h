@@ -10,14 +10,14 @@ enum class ELetter_Type
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AFalling_Letter
+class AFalling_Letter : public AGraphics_Object
 {
 public:
    AFalling_Letter(EBrick_Type, ELetter_Type, int, int);
 
-   void Act();
-   void Draw(HDC, RECT&);
-   bool Is_Finished();
+   virtual void Act();
+   virtual void Draw(HDC, RECT&);
+   virtual bool Is_Finished();
 
    const EBrick_Type Brick_Type;
    const ELetter_Type Letter_Type;
@@ -60,7 +60,9 @@ private:
    void Add_Active_Brick(int, int, EBrick_Type);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
-   void Draw_Brick(HDC, int, int, EBrick_Type);
+   void Draw_Brick(HDC, RECT &, EBrick_Type);
+   void Draw_Objects(HDC, RECT&, AGraphics_Object **, int);
+   void Act_Objects(AGraphics_Object **, int);
 
    RECT Level_Rect;
 

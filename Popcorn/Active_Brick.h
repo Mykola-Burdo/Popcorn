@@ -19,14 +19,23 @@ enum class EBrick_Type
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AActive_Brick
+class AGraphics_Object
+{
+public:
+	virtual void Act() = 0;
+	virtual void Draw(HDC, RECT &) = 0;
+	virtual bool Is_Finished() = 0;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AActive_Brick : public AGraphics_Object
 {
 public:
 	AActive_Brick(EBrick_Type, int, int);
 
-	void Act();
-	void Draw(HDC, RECT &);
-	bool Is_Finished();
+	virtual void Act();
+	virtual void Draw(HDC, RECT&);
+	virtual bool Is_Finished();
 
 	static void Setup_Colors();
 
@@ -38,7 +47,7 @@ private:
 	int Fade_Step;
 	RECT Brick_Rect;
 
-	static const int Max_Fade_Step = 80;
+	static const int Max_Fade_Step = AsConfig::FPS;
 
 	static HPEN Fading_Red_Brick_Pens[Max_Fade_Step];
 	static HBRUSH Fading_Red_Brick_Brushes[Max_Fade_Step];
