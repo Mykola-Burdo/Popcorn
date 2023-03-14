@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-   : Game_State(EGame_State::EGS_Play_Level)
+   : Game_State(EGame_State::EGS_Lost_Ball)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,9 +33,9 @@ void AsEngine::Init(HWND hwnd)
 
    Level.Set_Current_Level(AsLevel::Level_01);
 
-   Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
+   //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
 
-   Platform.Set_State(EPlatform_State::EPS_Normal);
+   //Platform.Set_State(EPlatform_State::EPS_Normal);
    
    Platform.Redraw_Platform();
 
