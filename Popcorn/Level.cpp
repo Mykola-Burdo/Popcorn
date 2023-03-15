@@ -10,7 +10,7 @@ char AsLevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -266,12 +266,15 @@ void AsLevel::Add_Active_Brick(int brick_x, int brick_y, EBrick_Type brick_type)
 
    case EBrick_Type::EBT_Red:
    case EBrick_Type::EBT_Blue:
-      active_brick = new AActive_Brick(brick_type, brick_x, brick_y);
+      active_brick = new AActive_Brick_Red_Blue(brick_type, brick_x, brick_y);
       Current_Level[brick_y][brick_x] = (char)EBrick_Type::EBT_None;
       break;
-/*
+
    case EBrick_Type::EBT_Unbreakable:
+      active_brick = new AActive_Brick_Unbreakable(brick_x, brick_y);
       break;
+
+/*
 
    case EBrick_Type::EBT_Multihit_1:
       break;
@@ -295,7 +298,7 @@ void AsLevel::Add_Active_Brick(int brick_x, int brick_y, EBrick_Type brick_type)
       break;
 */
    default:
-      return;
+      throw 13  ;
 
    }
 
@@ -401,8 +404,13 @@ void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type)
       brush = AsConfig::Brick_Blue_Brush;
       break;
 
+   case EBrick_Type::EBT_Unbreakable:
+      pen = AsConfig::Brick_White_Pen;
+      brush = AsConfig::Brick_White_Brush;
+      break;
+
    default:
-      return;
+      throw 13;
    }
 
    SelectObject(hdc, pen);
