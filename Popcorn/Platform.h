@@ -22,7 +22,6 @@ public:
 
    virtual bool Check_Hit(double, double, ABall *);
 
-   void Init();
    void Act();
    EPlatform_State Get_State();
    void Set_State(EPlatform_State);
@@ -43,7 +42,7 @@ private:
    void Draw_Roll_In_State(HDC, RECT &);
    void Draw_Expanding_Roll_In_State(HDC, RECT &);
    bool Reflect_On_Circle(double, double, double, ABall *);
-   bool Get_Platform_Image_Stroke_Color(int, int, HPEN &, int &);
+   bool Get_Platform_Image_Stroke_Color(int, int, const AColor **, int &);
 
    EPlatform_State Platform_State;
    int Inner_Width;
@@ -58,9 +57,7 @@ private:
 
    RECT Platform_Rect, Prev_Platform_Rect;
 
-   AColor Higlight_Pen_Color, Platform_Circle_Pen_Color, Platform_Inner_Penn_Color;
-   HPEN Highlight_Pen, Platform_Circle_Pen, Platform_Inner_Pen;
-   HBRUSH Platform_Circle_Brush, Platform_Inner_Brush;
+   AColor Highlight_Color, Platform_Circle_Color, Platform_Inner_Color;
 
    static const int Height = 7;
    static const int Circle_Size = 7;

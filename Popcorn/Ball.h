@@ -22,7 +22,6 @@ class ABall
 {
 public:
    ABall();
-   void Init();
    void Draw(HDC, RECT &);
    void Move();
    void Set_For_Test();
@@ -45,9 +44,6 @@ private:
    void Redraw_Ball();
 
    EBall_State Ball_State;
-
-   HPEN Ball_Pen;
-   HBRUSH Ball_Brush;
 
    double Center_X_Pos, Center_Y_Pos;
    double Rest_Distance;

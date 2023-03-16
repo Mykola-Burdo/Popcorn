@@ -25,8 +25,7 @@ void AFalling_Letter::Draw(HDC hdc, RECT& paint_area)
    // Background cleaning
    if (IntersectRect(&intersection_rect, &paint_area, &Prev_Letter_Cell))
    {
-      SelectObject(hdc, AsConfig::BG_Pen);
-      SelectObject(hdc, AsConfig::BG_Brush);
+      AsConfig::BG_Color.Select(hdc);
 
       Rectangle(hdc, Prev_Letter_Cell.left, Prev_Letter_Cell.top, Prev_Letter_Cell.right, Prev_Letter_Cell.bottom);
    }
@@ -139,23 +138,17 @@ ELetter_Type AFalling_Letter::Get_Random_Letter_Type()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AFalling_Letter::Set_Brick_Letter_Colors(bool is_switch_color, HPEN& front_pen, HBRUSH& front_brush, HPEN& back_pen, HBRUSH& back_brush)
+void AFalling_Letter::Set_Brick_Letter_Colors(bool is_switch_color, const AColor **front_color, const AColor **back_color)
 {
    if (is_switch_color)
    {
-      front_pen = AsConfig::Brick_Red_Pen;
-      front_brush = AsConfig::Brick_Red_Brush;
-
-      back_pen = AsConfig::Brick_Blue_Pen;
-      back_brush = AsConfig::Brick_Blue_Brush;
+      *front_color = &AsConfig::Red_Color;
+      *back_color = &AsConfig::Blue_Color;
    }
    else
    {
-      front_pen = AsConfig::Brick_Blue_Pen;
-      front_brush = AsConfig::Brick_Blue_Brush;
-
-      back_pen = AsConfig::Brick_Red_Pen;
-      back_brush = AsConfig::Brick_Red_Brush;
+      *front_color = &AsConfig::Blue_Color;
+      *back_color = &AsConfig::Red_Color;
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,8 +161,7 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
    double y_ratio;
    double rotation_angle; // Pitch to angle conversion
    int back_part_offset;
-   HPEN front_pen, back_pen;
-   HBRUSH front_brush, back_brush;
+   const AColor *front_color, *back_color;
    XFORM xform, old_xform;
 
    if (!(Brick_Type == EBrick_Type::EBT_Blue || Brick_Type == EBrick_Type::EBT_Red))
@@ -198,19 +190,17 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
          switch_color = false;
    }
 
-   Set_Brick_Letter_Colors(switch_color, front_pen, front_brush, back_pen, back_brush);
+   Set_Brick_Letter_Colors(switch_color, &front_color, &back_color);
 
    if (Rotation_Step == 4 || Rotation_Step == 12)
    {
       // Background output
-      SelectObject(hdc, back_pen);
-      SelectObject(hdc, back_brush);
+      back_color->Select(hdc);
 
       RoundRect(hdc, X, Y + Brick_Half_Height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
 
       // Foreground output
-      SelectObject(hdc, front_pen);
-      SelectObject(hdc, front_brush);
+      front_color->Select(hdc);
 
       RoundRect(hdc, X, Y + Brick_Half_Height, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height + AsConfig::Global_Scale, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
    }
@@ -230,8 +220,7 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
       SetWorldTransform(hdc, &xform);
 
       // Background output
-      SelectObject(hdc, back_pen);
-      SelectObject(hdc, back_brush);
+      back_color->Select(hdc);
 
       offset = 3.0 * (1.0 - fabs(xform.eM22)) * (double)AsConfig::Global_Scale;
       back_part_offset = (int)round(offset);
@@ -242,13 +231,13 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
       RoundRect(hdc, 0, -Brick_Half_Height - back_part_offset, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height - back_part_offset, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
 
       //Foreground output
-      SelectObject(hdc, front_pen);
-      SelectObject(hdc, front_brush);
+      front_color->Select(hdc);
+
       RoundRect(hdc, 0, -Brick_Half_Height, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
 
       if (Rotation_Step > 4 && Rotation_Step <= 12)
       {
-         SelectObject(hdc, AsConfig::Letter_Pen);
+         SelectObject(hdc, AsConfig::White_Color.Pen);
          switch (Letter_Type)
          {
          case ELetter_Type::ELT_O: // "Cancel"

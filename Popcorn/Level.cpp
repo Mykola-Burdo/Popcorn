@@ -384,37 +384,34 @@ bool AsLevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, int lev
 void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type)
 {// The conclusion of the "brick"
 
-   HPEN pen;
-   HBRUSH brush;
+   const AColor *color = 0;
 
    switch (brick_type)
    {
    case EBrick_Type::EBT_None:
-      pen = AsConfig::BG_Pen;
-      brush = AsConfig::BG_Brush;
+
+      color = &AsConfig::BG_Color;
       return;
 
    case EBrick_Type::EBT_Red:
-      pen = AsConfig::Brick_Red_Pen;
-      brush = AsConfig::Brick_Red_Brush;
+      color = &AsConfig::Red_Color;
       break;
 
    case EBrick_Type::EBT_Blue:
-      pen = AsConfig::Brick_Blue_Pen;
-      brush = AsConfig::Brick_Blue_Brush;
+      color = &AsConfig::Blue_Color;
       break;
 
    case EBrick_Type::EBT_Unbreakable:
-      pen = AsConfig::Brick_White_Pen;
-      brush = AsConfig::Brick_White_Brush;
+      color = &AsConfig::White_Color;
       break;
 
    default:
       throw 13;
    }
 
-   SelectObject(hdc, pen);
-   SelectObject(hdc, brush);
+   if(color != 0)
+      color->Select(hdc);
+
    RoundRect(hdc, brick_rect.left, brick_rect.top, brick_rect.right - 1, brick_rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------

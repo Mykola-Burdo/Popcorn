@@ -50,7 +50,7 @@ public:
    const ELetter_Type Letter_Type;
 
 private:
-   void Set_Brick_Letter_Colors(bool, HPEN &, HBRUSH &, HPEN &, HBRUSH &);
+   void Set_Brick_Letter_Colors(bool, const AColor **, const AColor **);
    void Draw_Brick_Letter(HDC);
    void Draw_C(HDC);
    void Draw_Line(HDC, int, int, int, int);
