@@ -52,6 +52,7 @@ public:
 	virtual bool Is_Finished();
 
 	static void Setup_Colors();
+	static void Draw_In_Level(HDC, RECT &, EBrick_Type);
 
 private:
 	int Fade_Step;
@@ -76,8 +77,12 @@ public:
 	virtual void Draw(HDC, RECT&);
 	virtual bool Is_Finished();
 
-private:
-	int Unbreakable_Animation_Step;
+	static void Draw_In_Level(HDC, RECT &);
 
-	static const int Max_Unbreakable_Animation_Step = 5;
+private:
+	int Animation_Step;
+	HRGN Region;
+
+	static const int Max_Animation_Step = 12;
+	static AColor Blue_Highlight, Red_Highlight;
 };

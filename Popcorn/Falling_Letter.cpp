@@ -197,12 +197,12 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
       // Background output
       back_color->Select(hdc);
 
-      RoundRect(hdc, X, Y + Brick_Half_Height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
+      Rectangle(hdc, X, Y + Brick_Half_Height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height);
 
       // Foreground output
       front_color->Select(hdc);
 
-      RoundRect(hdc, X, Y + Brick_Half_Height, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height + AsConfig::Global_Scale, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
+      Rectangle(hdc, X, Y + Brick_Half_Height, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height + AsConfig::Global_Scale);
    }
    else
    {
@@ -228,16 +228,16 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
       if(y_ratio < 0.0)
          back_part_offset = -back_part_offset;
 
-      RoundRect(hdc, 0, -Brick_Half_Height - back_part_offset, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height - back_part_offset, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
+      Rectangle(hdc, 0, -Brick_Half_Height - back_part_offset, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height - back_part_offset);
 
       //Foreground output
       front_color->Select(hdc);
 
-      RoundRect(hdc, 0, -Brick_Half_Height, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height, 3 * AsConfig::Global_Scale, 3 * AsConfig::Global_Scale);
+      Rectangle(hdc, 0, -Brick_Half_Height, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height);
 
       if (Rotation_Step > 4 && Rotation_Step <= 12)
       {
-         SelectObject(hdc, AsConfig::White_Color.Pen);
+         AsConfig::White_Color.Select_Pen(hdc);
          switch (Letter_Type)
          {
          case ELetter_Type::ELT_O: // "Cancel"
