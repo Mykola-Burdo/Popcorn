@@ -21,6 +21,7 @@ public:
 
 private:
    void On_Hit(int, int);
+   void Redraw_Brick(int, int);
    bool Add_Falling_Letter(int, int, EBrick_Type);
    void Add_Active_Brick(int, int, EBrick_Type);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
