@@ -20,13 +20,15 @@ public:
    static char Test_Level[AsConfig::Level_Height][AsConfig::Level_Width];
 
 private:
-   void On_Hit(int, int);
+   void On_Hit(int, int, ABall *);
    void Redraw_Brick(int, int);
    bool Add_Falling_Letter(int, int, EBrick_Type);
    void Add_Active_Brick(int, int, EBrick_Type);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
    void Draw_Brick(HDC, RECT &, EBrick_Type);
+   void Draw_Parachute_In_Level(HDC, RECT &);
+   void Draw_Parachute_Part(HDC, RECT &, int, int);
    void Draw_Objects(HDC, RECT&, AGraphics_Object **, int);
    void Act_Objects(AGraphics_Object **, int);
 
@@ -34,6 +36,8 @@ private:
 
    double Current_Brick_Left_X, Current_Brick_Right_X;
    double Current_Brick_Top_Y, Current_Brick_Low_Y;
+
+   AColor Parachute_Color;
 
    char Current_Level[AsConfig::Level_Height][AsConfig::Level_Width];
    int Active_Bricks_Count;

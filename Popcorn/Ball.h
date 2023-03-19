@@ -6,7 +6,8 @@ enum class EBall_State
 {
    EBS_Normal,
    EBS_Lost,
-   EBS_On_Platform
+   EBS_On_Platform,
+   EBS_On_Parachute
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 class ABall;
@@ -33,6 +34,7 @@ public:
    void Reflect(bool);
    bool Is_Moving_Up(); 
    bool Is_Moving_Left();
+   void Set_On_Parachute(int, int);
 
    static void Add_Hit_Checker(AHit_Checker *);
 
@@ -42,6 +44,7 @@ public:
 
 private:
    void Redraw_Ball();
+   void Draw_Parachute(HDC, RECT &);
 
    EBall_State Ball_State;
 
@@ -54,8 +57,10 @@ private:
    double Rest_Test_Distance;
 
    RECT Ball_Rect, Prev_Ball_Rect;
+   RECT Parachute_Rect;
 
    static const double Start_Ball_Y_Pos;
+   static const int Parachute_Size = 15;
    static int Hit_Checkers_Count;
    static AHit_Checker *Hit_Checkers[3];
 };

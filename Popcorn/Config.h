@@ -10,6 +10,7 @@ public:
    AColor();
    AColor(unsigned char, unsigned char, unsigned char);
    AColor(const AColor &, int);
+   AColor(const AColor &, const AColor &, int);
 
    int Get_RGB() const;
    void Select(HDC) const;
