@@ -29,7 +29,7 @@ int ABall::Hit_Checkers_Count = 0;
 AHit_Checker *ABall::Hit_Checkers[] = {};
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-   : Ball_State(EBall_State::EBS_Normal), Center_X_Pos(0.0), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(0.0), Rest_Distance(0.0), Ball_Direction(0),
+   : Ball_State(EBall_State::EBS_Normal), Prev_Ball_State(EBall_State::EBS_Normal), Center_X_Pos(0.0), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(0.0), Rest_Distance(0.0), Ball_Direction(0),
    Testing_Is_Active(false), Test_Iteration(0), Ball_Rect{}, Prev_Ball_Rect{}
 {
    //Set_State(EBall_State::EBS_Normal, 0);
@@ -48,11 +48,25 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
       Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
    }
 
-   if(Ball_State == EBall_State::EBS_On_Parachute)
+   switch (Ball_State)
+   {
+   case EBall_State::EBS_On_Parachute:
       Draw_Parachute(hdc, paint_area);
+      break;
 
-   if(Ball_State == EBall_State::EBS_Lost)
+   case EBall_State::EBS_Off_Parachute:
+      Clear_Parachute(hdc);
+      Set_State(EBall_State::EBS_Normal, Center_X_Pos, Center_Y_Pos);
+      break;
+
+   case EBall_State::EBS_Lost:
+      if(Prev_Ball_State == EBall_State::EBS_On_Parachute)
+         Clear_Parachute(hdc);
+
       return;
+   }
+
+      
 
    // Drawing a ball
    if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))
@@ -69,7 +83,7 @@ void ABall::Move()
    bool got_hit;
    double next_x_pos, next_y_pos;
 
-   if(Ball_State != EBall_State::EBS_Normal)
+   if(Ball_State == EBall_State::EBS_Lost || Ball_State == EBall_State::EBS_On_Platform)
       return;
 
    Prev_Ball_Rect = Ball_Rect;
@@ -97,9 +111,22 @@ void ABall::Move()
          if(Testing_Is_Active)
             Rest_Test_Distance -= AsConfig::Moving_Step_Size;
       }
+
+      if(Ball_State == EBall_State::EBS_Lost)
+         break;
    }
 
    Redraw_Ball();
+
+   if (Ball_State == EBall_State::EBS_On_Parachute)
+   {
+      Prev_Parachute_Rect = Parachute_Rect;
+
+      Parachute_Rect.bottom = Ball_Rect.bottom;
+      Parachute_Rect.top = Parachute_Rect.bottom - Parachute_Size * AsConfig::Global_Scale;
+
+      Redraw_Parachute();
+   }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -152,7 +179,12 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 
 
    case EBall_State::EBS_Lost:
+      if (! (Ball_State == EBall_State::EBS_Normal || Ball_State == EBall_State::EBS_On_Parachute))
+         AsConfig::Throw(); // Only from these states can you lose the ball!
+
       Ball_Speed = 0.0;
+      Redraw_Ball();
+      Redraw_Parachute();
       break;
 
 
@@ -164,8 +196,23 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
       Ball_Direction = M_PI_4;
       Redraw_Ball();
       break;
+
+   case EBall_State::EBS_On_Parachute:
+      AsConfig::Throw(); // To put on a parachute, you need to call the special Set_On_Parachute() method
+      break;
+
+   case EBall_State::EBS_Off_Parachute:
+      if(Ball_State != EBall_State::EBS_On_Parachute)
+         AsConfig::Throw(); // This state can only be entered from EBS_On_Parachute!
+
+      Ball_Speed = 0.0;
+      Rest_Distance = 0.0;
+      Redraw_Ball();
+      Redraw_Parachute();
+      break;
    }
 
+   Prev_Ball_State = Ball_State;
    Ball_State = new_state;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -231,8 +278,12 @@ void ABall::Set_On_Parachute(int brick_x, int brick_y)
    Parachute_Rect.right = Parachute_Rect.left + Parachute_Size * AsConfig::Global_Scale;
    Parachute_Rect.bottom = Parachute_Rect.top + Parachute_Size * AsConfig::Global_Scale;
 
-   Center_X_Pos = (double)(cell_x + AsConfig::Cell_Width / 2);
-   Center_Y_Pos = (double)(cell_y + Parachute_Size);
+   Prev_Parachute_Rect = Parachute_Rect;
+
+   Center_X_Pos = (double)(cell_x + AsConfig::Cell_Width / 2) - 1.0 / (double)AsConfig::Global_Scale;
+   Center_Y_Pos = (double)(cell_y + Parachute_Size) - ABall::Radius * 2.0;
+
+   Redraw_Parachute();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -257,8 +308,87 @@ void ABall::Redraw_Ball()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void ABall::Redraw_Parachute()
+{
+   InvalidateRect(AsConfig::Hwnd, &Prev_Parachute_Rect, FALSE);
+   InvalidateRect(AsConfig::Hwnd, &Parachute_Rect, FALSE);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 void ABall::Draw_Parachute(HDC hdc, RECT &paint_area)
 {
+   const int scale = AsConfig::Global_Scale;
+   int dome_height = (Parachute_Rect.bottom - Parachute_Rect.top) / 2;
+   int arc_height = 4 * scale;
+   int arc_x;
+   int line_y;
+   int ball_center_x, ball_center_y;
+   RECT intersection_rect, sub_arc, other_arc;
+
+   if (! IntersectRect(&intersection_rect, &paint_area, &Parachute_Rect))
+      return;
+
+   Clear_Parachute(hdc);
+
+   // Dome
+   AsConfig::Blue_Color.Select(hdc);
+   Chord(hdc, Parachute_Rect.left, Parachute_Rect.top, Parachute_Rect.right - 1, Parachute_Rect.bottom - 1,
+      Parachute_Rect.right, Parachute_Rect.top + dome_height - 1, Parachute_Rect.left, Parachute_Rect.top + dome_height - 1);
+
+   // Arches
+   AsConfig::BG_Color.Select(hdc);
+
+   arc_x = Parachute_Rect.left + 1;
+
+   // Left
+   sub_arc.left = arc_x;
+   sub_arc.top = Parachute_Rect.top + dome_height - arc_height / 2;
+   sub_arc.right = sub_arc.left + 3 * scale;
+   sub_arc.bottom = sub_arc.top + 4 * scale;
+
+   Ellipse(hdc, sub_arc.left, sub_arc.top, sub_arc.right - 1, sub_arc.bottom - 1);
+
+   // Medium
+   other_arc = sub_arc;
+
+   other_arc.left = arc_x + 3 * scale + 1;
+   other_arc.right = arc_x + 11 * scale;
    
+   Ellipse(hdc, other_arc.left, other_arc.top, other_arc.right - 1, other_arc.bottom - 1);
+
+   // Right
+   other_arc = sub_arc;
+
+   other_arc.left = arc_x + 11 * scale + 1;
+   other_arc.right = arc_x + 14 * scale + 1;
+
+   Ellipse(hdc, other_arc.left, other_arc.top, other_arc.right - 1, other_arc.bottom - 1);
+
+   // Slings
+   line_y = Parachute_Rect.top + dome_height;
+   ball_center_x = (Parachute_Rect.left + Parachute_Rect.right) / 2;
+   ball_center_y = Parachute_Rect.bottom - 2 * scale;
+
+   AsConfig::White_Color.Select(hdc);
+
+   MoveToEx(hdc, Parachute_Rect.left, line_y, 0);
+   LineTo(hdc, ball_center_x, ball_center_y);
+
+   MoveToEx(hdc, Parachute_Rect.left + 3 * scale + 1, line_y, 0);
+   LineTo(hdc, ball_center_x, ball_center_y);
+
+   MoveToEx(hdc, Parachute_Rect.right - 4 * scale + 1, line_y, 0);
+   LineTo(hdc, ball_center_x, ball_center_y);
+
+   MoveToEx(hdc, Parachute_Rect.right, line_y - 1, 0);
+   LineTo(hdc, ball_center_x, ball_center_y);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ABall::Clear_Parachute(HDC hdc)
+{// Cleaning up the background
+
+   AsConfig::BG_Color.Select(hdc);
+   AsConfig::Round_Rect(hdc, Prev_Parachute_Rect);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
