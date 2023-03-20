@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Falling_Letter.h"
-#include "Ball.h"
 
 class AsLevel : public AHit_Checker
 {
@@ -23,7 +22,7 @@ private:
    void On_Hit(int, int, ABall *);
    void Redraw_Brick(int, int);
    bool Add_Falling_Letter(int, int, EBrick_Type);
-   void Add_Active_Brick(int, int, EBrick_Type);
+   void Add_Active_Brick(int, int, EBrick_Type, ABall *);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
    void Draw_Brick(HDC, RECT &, EBrick_Type);

@@ -8,7 +8,8 @@ enum class EBall_State
    EBS_Lost,
    EBS_On_Platform,
    EBS_On_Parachute,
-   EBS_Off_Parachute
+   EBS_Off_Parachute,
+   EBS_Teleporting
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 class ABall;
@@ -25,6 +26,7 @@ class ABall
 public:
    ABall();
    void Draw(HDC, RECT &);
+   void Draw_Teleporting(HDC, int);
    void Move();
    void Set_For_Test();
    bool Is_Test_Finished();

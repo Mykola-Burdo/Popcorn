@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "Ball.h"
 
 enum class EBrick_Type
 {
@@ -84,7 +84,6 @@ private:
 	HRGN Region;
 
 	static const int Max_Animation_Step = 12;
-	static AColor Blue_Highlight, Red_Highlight;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -107,4 +106,25 @@ private:
 
 	static const int Steps_Per_Turn = 16;
 	static const int Max_Rotation_Step = Steps_Per_Turn * 4;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AActive_Brick_Teleport : public AActive_Brick
+{
+public:
+	~AActive_Brick_Teleport();
+	AActive_Brick_Teleport(int, int, ABall *);
+
+	virtual void Act();
+	virtual void Draw(HDC, RECT &);
+	virtual bool Is_Finished();
+
+	static void Draw_In_Level(HDC, RECT &, int step = 0);
+
+private:
+	int Animation_Step;
+
+	ABall* Ball;
+
+	static const int Max_Animation_Step = 12;
 };
