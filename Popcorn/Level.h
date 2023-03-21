@@ -26,19 +26,20 @@ public:
    static char Test_Level[AsConfig::Level_Height][AsConfig::Level_Width];
 
 private:
-   void On_Hit(int, int, ABall *);
+   bool On_Hit(int, int, ABall *, bool);
    void Redraw_Brick(int, int);
    bool Add_Falling_Letter(int, int, EBrick_Type);
-   void Create_Active_Brick(int, int, EBrick_Type, ABall *);
+   bool Create_Active_Brick(int, int, EBrick_Type, ABall *, bool);
+   void Add_Active_Brick_Teleport(int, int, ABall *, bool);
    void Add_New_Active_Brick(AActive_Brick *);
-   AActive_Brick_Teleport *Select_Destination_Teleport();
+   AActive_Brick_Teleport *Select_Destination_Teleport(int, int);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
    void Draw_Brick(HDC, RECT &, EBrick_Type);
    void Draw_Parachute_In_Level(HDC, RECT &);
    void Draw_Parachute_Part(HDC, RECT &, int, int);
    void Draw_Objects(HDC, RECT&, AGraphics_Object **, int);
-   void Act_Objects(AGraphics_Object **, int);
+   void Act_Objects(AGraphics_Object **, int &, const int);
 
    RECT Level_Rect;
 
