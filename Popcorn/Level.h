@@ -2,9 +2,16 @@
 
 #include "Falling_Letter.h"
 
+struct SPoint
+{
+   int X, Y;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 class AsLevel : public AHit_Checker
 {
 public:
+   ~AsLevel();
    AsLevel();
 
    virtual bool Check_Hit(double, double, ABall*);
@@ -22,7 +29,9 @@ private:
    void On_Hit(int, int, ABall *);
    void Redraw_Brick(int, int);
    bool Add_Falling_Letter(int, int, EBrick_Type);
-   void Add_Active_Brick(int, int, EBrick_Type, ABall *);
+   void Create_Active_Brick(int, int, EBrick_Type, ABall *);
+   void Add_New_Active_Brick(AActive_Brick *);
+   AActive_Brick_Teleport *Select_Destination_Teleport();
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
    void Draw_Brick(HDC, RECT &, EBrick_Type);
@@ -43,4 +52,6 @@ private:
    AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count]; 
    int Falling_Letters_Count;
    AFalling_Letter * Falling_Letters[AsConfig::Max_Falling_Letters_Count];
+   int Teleport_Bricks_Count;
+   SPoint *Teleport_Bricks_Pos;
 };

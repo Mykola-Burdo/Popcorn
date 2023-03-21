@@ -32,6 +32,7 @@ public:
    bool Is_Test_Finished();
    EBall_State Get_State();
    void Set_State(EBall_State, double, double y_pos = Start_Ball_Y_Pos);
+   void Get_Center(double &, double &);
    double Get_Direction();
    void Set_Direction(double);
    void Reflect(bool);
