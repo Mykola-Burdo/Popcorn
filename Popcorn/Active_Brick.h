@@ -34,6 +34,7 @@ public:
 	virtual ~AGraphics_Object();
 
 	virtual void Act() = 0;
+	virtual void Clear(HDC, RECT &) = 0;
 	virtual void Draw(HDC, RECT &) = 0;
 	virtual bool Is_Finished() = 0;
 };
@@ -47,6 +48,8 @@ public:
 protected:
 	virtual ~AActive_Brick();
 	AActive_Brick(EBrick_Type, int, int);
+
+	virtual void Clear(HDC, RECT&);
 
 	double Get_Brick_X_Pos(bool);
 	double Get_Brick_Y_Pos(bool);
@@ -158,3 +161,37 @@ private:
 
 	static const int Max_Animation_Step = 12;
 };
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AAdvertisement : public AGraphics_Object
+{
+public:
+	AAdvertisement(int, int, int, int);
+
+	virtual void Act();
+	virtual void Clear(HDC, RECT &);
+	virtual void Draw(HDC, RECT &);
+	virtual bool Is_Finished();
+
+private:
+	int Level_X, Level_Y;
+	int Width, Height;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AActive_Brick_Ad : public AActive_Brick
+{
+public:
+	~AActive_Brick_Ad();
+	AActive_Brick_Ad(int, int);
+
+	virtual void Act();
+	virtual void Draw(HDC, RECT&);
+	virtual bool Is_Finished();
+
+	static void Draw_In_Level(HDC, RECT&);
+
+private:
+	static const int Circle_Size = 7;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------

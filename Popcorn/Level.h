@@ -38,7 +38,8 @@ private:
    void Draw_Brick(HDC, RECT &, EBrick_Type);
    void Draw_Parachute_In_Level(HDC, RECT &);
    void Draw_Parachute_Part(HDC, RECT &, int, int);
-   void Draw_Objects(HDC, RECT&, AGraphics_Object **, int);
+   void Clear_Objects(HDC hdc, RECT &, AGraphics_Object **, int);
+   void Draw_Objects(HDC, RECT &, AGraphics_Object **, int);
    void Act_Objects(AGraphics_Object **, int &, const int);
 
    RECT Level_Rect;
@@ -55,4 +56,5 @@ private:
    AFalling_Letter * Falling_Letters[AsConfig::Max_Falling_Letters_Count];
    int Teleport_Bricks_Count;
    SPoint *Teleport_Bricks_Pos;
+   AAdvertisement *Advertisement;
 };

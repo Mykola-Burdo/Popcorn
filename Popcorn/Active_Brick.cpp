@@ -31,6 +31,11 @@ AActive_Brick::AActive_Brick(EBrick_Type brick_type, int level_x, int level_y)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void AActive_Brick::Clear(HDC hdc, RECT &paint_area)
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 double AActive_Brick::Get_Brick_X_Pos(bool of_center)
 {
 	double pos = (double)(AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width);
@@ -541,5 +546,112 @@ void AActive_Brick_Teleport::Set_Ball(ABall* ball)
 		ball->Set_State(EBall_State::EBS_Teleporting, ball_x, ball_y);
 
 	Ball = ball;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------AAdvertisement--------------------
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+AAdvertisement::AAdvertisement(int level_x, int level_y, int width, int height)
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height)
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AAdvertisement::Act()
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AAdvertisement::Clear(HDC, RECT &)
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AAdvertisement::Draw(HDC, RECT &)
+{
+	// Ball
+
+	// Shadow under the ball
+
+	// Table
+
+	// Frame
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AAdvertisement::Is_Finished()
+{
+	return false; // Advertising never ends!
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+//--------------AActive_Brick_Ad--------------------
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+AActive_Brick_Ad::~AActive_Brick_Ad()
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+AActive_Brick_Ad::AActive_Brick_Ad(int level_x, int level_y)
+	: AActive_Brick(EBrick_Type::EBT_Unbreakable, level_x, level_y)
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AActive_Brick_Ad::Act()
+{
+	/*if (Animation_Step <= Max_Animation_Step)
+	{
+		++Animation_Step;
+		InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
+	}*/
+
+	InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AActive_Brick_Ad::Draw(HDC hdc, RECT& paint_area)
+{
+	
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AActive_Brick_Ad::Is_Finished()
+{
+	/*if (Animation_Step >= Max_Animation_Step)
+		return true;
+	else*/
+		return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AActive_Brick_Ad::Draw_In_Level(HDC hdc, RECT &brick_rect)
+{// Output of an inactive brick on a level
+
+	const int scale = AsConfig::Global_Scale;
+
+	int x = brick_rect.left;
+	int y = brick_rect.top;
+	int size = (Circle_Size - 1) * scale - 1;
+
+	for(int i = 0; i < 2; ++i)
+	{
+		AsConfig::Red_Color.Select(hdc);
+		Ellipse(hdc, x, y, x + 7 * scale, brick_rect.bottom);
+
+		// Draw a highlight on the ball
+		AsConfig::White_Color.Select(hdc);
+		Arc(hdc, x + scale, y + scale, x + size, y + size, x + 2 * scale, y + scale, x + scale, y + 4 * scale);
+
+		x += 8 * scale;
+	}
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
