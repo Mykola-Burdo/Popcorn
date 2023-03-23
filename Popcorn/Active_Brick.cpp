@@ -557,6 +557,10 @@ void AActive_Brick_Teleport::Set_Ball(ABall* ball)
 AAdvertisement::AAdvertisement(int level_x, int level_y, int width, int height)
 	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height)
 {
+	Ad_Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * AsConfig::Global_Scale;
+	Ad_Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
+	Ad_Rect.right = Ad_Rect.left + Width * AsConfig::Cell_Width * AsConfig::Global_Scale;
+	Ad_Rect.bottom = Ad_Rect.top + Height * AsConfig::Cell_Height * AsConfig::Global_Scale;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -565,18 +569,56 @@ void AAdvertisement::Act()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AAdvertisement::Clear(HDC, RECT &)
+void AAdvertisement::Clear(HDC hdc, RECT & paint_area)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AAdvertisement::Draw(HDC, RECT &)
+void AAdvertisement::Draw(HDC hdc, RECT &paint_area)
 {
-	// Ball
+	const int scale = AsConfig::Global_Scale;
+	RECT intersection_rect;
 
-	// Shadow under the ball
+	if (!IntersectRect(&intersection_rect, &paint_area, &Ad_Rect))
+		return;
 
 	// Table
+	AsConfig::White_Color.Select(hdc);
+
+	MoveToEx(hdc, Ad_Rect.left + 1, Ad_Rect.top + 15 * scale, 0);
+	LineTo(hdc, Ad_Rect.left + 15 * scale + 1, Ad_Rect.top + 10 * scale);
+	LineTo(hdc, Ad_Rect.left + 30 * scale + 1, Ad_Rect.top + 15 * scale);
+	LineTo(hdc, Ad_Rect.left + 15 * scale + 1, Ad_Rect.top + 20 * scale);
+	LineTo(hdc, Ad_Rect.left + 1, Ad_Rect.top + 15 * scale);
+
+	FloodFill(hdc, Ad_Rect.left + 15 * scale, Ad_Rect.top + 15 * scale, AsConfig::White_Color.Get_RGB());
+
+	// Shadow under the ball
+	AsConfig::Blue_Color.Select(hdc);
+
+	Ellipse(hdc, Ad_Rect.left +11 * scale + 1, Ad_Rect.top + 14 * scale, Ad_Rect.left + 20 * scale - 1, Ad_Rect.top + 18 * scale - 1);
+
+	// Table sides
+	// Blue border
+	AsConfig::Advertisement_Blue_Table.Select(hdc);
+
+	MoveToEx(hdc, Ad_Rect.left + 1, Ad_Rect.top + 15 * scale, 0);
+	LineTo(hdc, Ad_Rect.left + 15 * scale + 1, Ad_Rect.top + 10 * scale);
+	LineTo(hdc, Ad_Rect.left + 30 * scale + 1, Ad_Rect.top + 15 * scale);
+	LineTo(hdc, Ad_Rect.left + 15 * scale + 1, Ad_Rect.top + 20 * scale);
+	LineTo(hdc, Ad_Rect.left + 1, Ad_Rect.top + 15 * scale);
+
+	// Red board
+	AsConfig::Advertisement_Red_Table.Select(hdc);
+
+	MoveToEx(hdc, Ad_Rect.left + scale - 1, Ad_Rect.top + 16 * scale, 0);
+	LineTo(hdc, Ad_Rect.left + 15 * scale, Ad_Rect.top + 21 * scale);
+	LineTo(hdc, Ad_Rect.left + 30 * scale, Ad_Rect.top + 16 * scale);
+
+	// Ball
+	AsConfig::Red_Color.Select(hdc);
+
+	Ellipse(hdc, Ad_Rect.left + 9 * scale + 1, Ad_Rect.top + 2 * scale, Ad_Rect.left + 21 * scale + 1, Ad_Rect.top + 14 * scale);
 
 	// Frame
 }
