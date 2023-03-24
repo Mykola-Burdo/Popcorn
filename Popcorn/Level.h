@@ -35,7 +35,7 @@ private:
    AActive_Brick_Teleport *Select_Destination_Teleport(int, int);
    bool Check_Vertical_Hit(double, double, int, int, ABall *, double &);
    bool Check_Horizontal_Hit(double, double, int, int, ABall *, double &);
-   void Draw_Brick(HDC, RECT &, EBrick_Type);
+   void Draw_Brick(HDC, RECT &, int, int);
    void Draw_Parachute_In_Level(HDC, RECT &);
    void Draw_Parachute_Part(HDC, RECT &, int, int);
    void Clear_Objects(HDC hdc, RECT &, AGraphics_Object **, int);

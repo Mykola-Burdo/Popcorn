@@ -15,7 +15,8 @@ enum class EBrick_Type
 	EBT_Multihit_4,
 	EBT_Parachute,
 	EBT_Teleport,
-	EBT_Ad
+	EBT_Ad,
+	EBT_Invisible
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -166,6 +167,7 @@ private:
 class AAdvertisement : public AGraphics_Object
 {
 public:
+	~AAdvertisement();
 	AAdvertisement(int, int, int, int);
 
 	virtual void Act();
@@ -173,10 +175,15 @@ public:
 	virtual void Draw(HDC, RECT &);
 	virtual bool Is_Finished();
 
+	void Show_Under_Brick(int, int);
+	bool Has_Brick_At(int, int);
+
 private:
 	int Level_X, Level_Y;
 	int Width, Height;
 	RECT Ad_Rect;
+
+	char *Brick_Mask;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -184,7 +191,7 @@ class AActive_Brick_Ad : public AActive_Brick
 {
 public:
 	~AActive_Brick_Ad();
-	AActive_Brick_Ad(int, int);
+	AActive_Brick_Ad(int, int, AAdvertisement *);
 
 	virtual void Act();
 	virtual void Draw(HDC, RECT&);
@@ -193,6 +200,8 @@ public:
 	static void Draw_In_Level(HDC, RECT&);
 
 private:
+	AAdvertisement *Advertisement;
+
 	static const int Circle_Size = 7;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
