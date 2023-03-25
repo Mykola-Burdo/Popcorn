@@ -7,10 +7,10 @@ char AsLevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-   1, 1, 1, 1, 1, 0, 0, 0, 0, 10, 10, 1,
-   2, 2, 2, 2, 2, 0, 0, 0, 0, 10, 10, 2,
-   2, 2, 2, 2, 2, 0, 0, 0, 0, 10, 10, 2,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   1, 1, 1, 1, 1, 1, 1, 1, 0, 10, 10, 0,
+   2, 2, 2, 2, 2, 2, 2, 2, 0, 10, 10, 0,
+   2, 2, 2, 2, 2, 2, 2, 2, 0, 10, 10, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -77,7 +77,7 @@ bool AsLevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 
    max_level_x = (int)((max_ball_x - AsConfig::Level_X_Offset) / (double)AsConfig::Cell_Width);
    if (max_level_x >= AsConfig::Level_Width - 1)
-      min_level_x = AsConfig::Level_Width - 1;
+      max_level_x = AsConfig::Level_Width - 1;
 
    min_level_y = (int)((min_ball_y - AsConfig::Level_Y_Offset) / (double)AsConfig::Cell_Height);
    if (min_level_y < 0)
@@ -195,9 +195,7 @@ void AsLevel::Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Lev
             {
                Teleport_Bricks_Pos[index].X = j;
                Teleport_Bricks_Pos[index].Y = i;
-	       ++index;
-
-
+	            ++index;
             }
          }
       }
