@@ -622,7 +622,7 @@ void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, int level_x, int level_y)
    case EBrick_Type::EBT_None:
       if(Advertisement != 0 && Advertisement->Has_Brick_At(level_x, level_y))
          break;
-      // else - N0 break!
+      // else - No break!
 
    case EBrick_Type::EBT_Red:
    case EBrick_Type::EBT_Blue:

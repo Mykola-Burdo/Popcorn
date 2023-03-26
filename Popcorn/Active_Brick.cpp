@@ -569,21 +569,28 @@ AAdvertisement::~AAdvertisement()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 AAdvertisement::AAdvertisement(int level_x, int level_y, int width, int height)
-	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Empty_Region(0), Brick_Regions(0)
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Empty_Region(0), Ball_X(0), Ball_Y(0), 
+	Ball_Width(Ball_Size * AsConfig::Global_Scale), Ball_Height(Ball_Size * AsConfig::Global_Scale), Ball_Y_Offset(0),
+	Falling_Speed(0.0), Acceleration_Step(0.2),  Brick_Regions(0)
 {
+	const int scale = AsConfig::Global_Scale;
+
 	Empty_Region = CreateRectRgn(0, 0, 0, 0);
 
 	Brick_Regions = new HRGN[Width * Height];
 	memset(Brick_Regions, 0, sizeof(HRGN) * Width * Height);
 
-	Ad_Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * AsConfig::Global_Scale;
-	Ad_Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
-	Ad_Rect.right = Ad_Rect.left + ((Width - 1) * AsConfig::Cell_Width + AsConfig::Brick_Width) * AsConfig::Global_Scale;
-	Ad_Rect.bottom = Ad_Rect.top + ((Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height) * AsConfig::Global_Scale;
+	Ad_Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * scale;
+	Ad_Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * scale;
+	Ad_Rect.right = Ad_Rect.left + ((Width - 1) * AsConfig::Cell_Width + AsConfig::Brick_Width) * scale;
+	Ad_Rect.bottom = Ad_Rect.top + ((Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height) * scale;
 
-	for (int i = 0; i < Height; ++i)
-		for (int j = 0; j < Width; ++j)
-			Show_Under_Brick(Level_X + j, Level_Y + i);
+	Ball_X = Ad_Rect.left + 9 * scale + Ball_Width / 2 + 1;
+	Ball_Y = Ad_Rect.top + 2 * scale + Ball_Height / 2;
+
+	//for (int i = 0; i < Height; ++i)
+	//	for (int j = 0; j < Width; ++j)
+	//		Show_Under_Brick(Level_X + j, Level_Y + i);
 
 	
 }
@@ -595,6 +602,7 @@ void AAdvertisement::Act()
 	int cell_height = AsConfig::Cell_Height * AsConfig::Global_Scale;
 	RECT rect;
 
+	// We order the redrawing of fragments over which the bricks disappeared
 	for(int i = 0; i < Height; ++i)
 		for(int j = 0; j < Width; ++j)
 			if(Brick_Regions[i * Width + j] != 0)
@@ -606,6 +614,19 @@ void AAdvertisement::Act()
 
 				InvalidateRect(AsConfig::Hwnd, &rect, FALSE);
 			}
+
+	// Displace the ball
+	Falling_Speed += Acceleration_Step;
+	Ball_Y_Offset = High_Ball_Threshold - (int)(Falling_Speed * Falling_Speed);
+
+	if(Ball_Y_Offset <= Low_Ball_Threshold + Deformation_Height)
+		Deformation_Ratio = (double)(Ball_Y_Offset - Low_Ball_Threshold) / (double)Deformation_Height;
+	else
+		Deformation_Ratio = 1.0;
+
+	if(Ball_Y_Offset > High_Ball_Threshold || Ball_Y_Offset < Low_Ball_Threshold)
+		Acceleration_Step = -Acceleration_Step;
+
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -618,7 +639,9 @@ void AAdvertisement::Draw(HDC hdc, RECT &paint_area)
 {
 	const int scale = AsConfig::Global_Scale;
 	int x, y;
-	int circle_size = 12 * scale;
+	int ball_width, ball_height;
+	int shadow_width, shadow_height;
+	int deformation;
 	HRGN region;
 	RECT intersection_rect;
 	POINT table_points[4] =
@@ -654,7 +677,18 @@ void AAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	// Shadow under the ball
 	AsConfig::Blue_Color.Select(hdc);
 
-	Ellipse(hdc, Ad_Rect.left + 11 * scale + 1, Ad_Rect.top + 14 * scale, Ad_Rect.left + 20 * scale - 1, Ad_Rect.top + 18 * scale - 1);
+	shadow_width = Ball_Width - 4 * scale;
+	shadow_height = 4 * scale;
+
+	deformation = (int)((1.0 - Deformation_Ratio) * (double)scale * 2.0);
+
+	ball_width = shadow_width + deformation;
+	ball_height = shadow_height - deformation;
+
+	x = Ball_X - ball_width / 2;
+	y = Ball_Y - ball_height / 2 + Ball_Y_Offset / 6 + 9 * scale;
+
+	Ellipse(hdc, x, y, x + ball_width, y + ball_height);
 
 	// Table sides
 	// Blue border
@@ -674,15 +708,18 @@ void AAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	LineTo(hdc, Ad_Rect.left + 30 * scale - 1, Ad_Rect.top + 16 * scale);
 
 	// Ball
-	x = Ad_Rect.left + 9 * scale + 1;
-	y = Ad_Rect.top + 2 * scale;
+	ball_width = Ball_Width + deformation;
+	ball_height = Ball_Height - deformation;
+
+	x = Ball_X - ball_width / 2;
+	y = Ball_Y - ball_height / 2 - Ball_Y_Offset;
 
 	AsConfig::Red_Color.Select(hdc);
-	Ellipse(hdc, x, y, x + circle_size, y + circle_size);
+	Ellipse(hdc, x, y, x + ball_width, y + ball_height);
 
 	// Glare on top of the ball
 	AsConfig::Letter_Color.Select(hdc);
-	Arc(hdc, x + scale + 1, y + scale + 1, x + circle_size - scale, y + circle_size - scale, x + 4 * scale, y + scale, x + scale, y + 3 * scale);
+	Arc(hdc, x + scale + 1, y + scale + 1, x + ball_width - scale, y + ball_height - scale, x + 4 * scale, y + scale, x + scale, y + 3 * scale);
 
 	SelectClipRgn(hdc, 0);
 }
@@ -741,7 +778,7 @@ AActive_Brick_Ad::~AActive_Brick_Ad()
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AActive_Brick_Ad::AActive_Brick_Ad(int level_x, int level_y, AAdvertisement *advertisement)
-	: AActive_Brick(EBrick_Type::EBT_Unbreakable, level_x, level_y), Advertisement(Advertisement)
+	: AActive_Brick(EBrick_Type::EBT_Unbreakable, level_x, level_y), Advertisement(advertisement)
 {
 	if(Advertisement != 0)
 		Advertisement->Show_Under_Brick(Level_X, Level_Y);
@@ -785,13 +822,13 @@ void AActive_Brick_Ad::Draw_In_Level(HDC hdc, RECT &brick_rect)
 
 	// Erase the previous image
 	AsConfig::BG_Color.Select(hdc);
-	Rectangle(hdc, brick_rect.left, brick_rect.top, brick_rect.right + scale, brick_rect.bottom + scale);
+	Rectangle(hdc, brick_rect.left, brick_rect.top, brick_rect.right + scale - 1, brick_rect.bottom + scale - 1);
 
 	// Drawing balls
 	for(int i = 0; i < 2; ++i)
 	{
 		AsConfig::Red_Color.Select(hdc);
-		Ellipse(hdc, x, y, x + 7 * scale, brick_rect.bottom);
+		Ellipse(hdc, x, y, x + 7 * scale - 1, brick_rect.bottom - 1);
 
 		// Draw a highlight on the ball
 		AsConfig::White_Color.Select(hdc);
