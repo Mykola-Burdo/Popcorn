@@ -39,12 +39,14 @@ char AsLevel::Test_Level[AsConfig::Level_Height][AsConfig::Level_Width] =
 //--------------AsLevel--------------------
 AsLevel::~AsLevel()
 {
+   Cancel_All_Activity();
+
    delete[] Teleport_Bricks_Pos;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AsLevel::AsLevel()
-   : Level_Rect{}, Active_Bricks_Count(0), Falling_Letters_Count(0), Teleport_Bricks_Count(0), Teleport_Bricks_Pos(0),
+   : Level_Rect{}, Need_To_Cancel_All(false), Active_Bricks_Count(0), Falling_Letters_Count(0), Teleport_Bricks_Count(0), Teleport_Bricks_Pos(0),
    Parachute_Color(AsConfig::Red_Color, AsConfig::Blue_Color, AsConfig::Global_Scale), Advertisement(0)
 {
 }
@@ -216,7 +218,7 @@ void AsLevel::Act()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsLevel::Draw(HDC hdc, RECT& paint_area)
+void AsLevel::Draw(HDC hdc, RECT &paint_area)
 {// Output all bricks of the level
 
    RECT intersection_rect, brick_rect;
@@ -226,6 +228,12 @@ void AsLevel::Draw(HDC hdc, RECT& paint_area)
 
    if (Advertisement != 0)
       Advertisement->Clear(hdc, paint_area);
+
+   if(Need_To_Cancel_All)
+   {
+      Cancel_All_Activity();
+      Need_To_Cancel_All = false;
+   }
 
    // Draw all objects
    if (Advertisement != 0)
@@ -274,6 +282,12 @@ bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_lett
    }
 
    return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLevel::Stop()
+{
+   Need_To_Cancel_All = true;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -727,5 +741,27 @@ void AsLevel::Act_Objects(AGraphics_Object **objects_array, int &objects_count, 
          }
       }
    }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLevel::Delete_Objects(AGraphics_Object **objects_array, int &objects_count, int objects_max_count)
+{
+   for (int i = 0; i < objects_max_count; ++i)
+   {
+      if (objects_array[i] != 0)
+      {
+         delete objects_array[i];
+         objects_array[i] = 0;
+      }
+   }
+
+   objects_count = 0;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLevel::Cancel_All_Activity()
+{
+   Delete_Objects((AGraphics_Object**)&Active_Bricks, Active_Bricks_Count, AsConfig::Max_Active_Bricks_Count);
+   Delete_Objects((AGraphics_Object**)&Falling_Letters, Falling_Letters_Count, AsConfig::Max_Falling_Letters_Count);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------

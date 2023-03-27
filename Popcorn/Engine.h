@@ -34,6 +34,8 @@ public:
    int On_Timer();
 
 private:
+   void Restart_Level();
+   void Play_Level();
    void Act();
    void On_Falling_Letter(AFalling_Letter *);
 

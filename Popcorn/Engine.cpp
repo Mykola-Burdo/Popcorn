@@ -109,20 +109,7 @@ int AsEngine::On_Timer()
 
 
    case EGame_State::EGS_Play_Level:
-      for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
-      {
-         Balls[i].Move();
-      
-         if(Balls[i].Get_State() == EBall_State::EBS_Lost)
-         {
-            Game_State = EGame_State::EGS_Lost_Ball;
-            Platform.Set_State(EPlatform_State::EPS_Meltdown);
-         }
-      }
-
-      if (Balls[0].Is_Test_Finished())
-         Game_State = EGame_State::EGS_Test_Ball; // Only the ball with index 0 participates in repeated tests
-
+      Play_Level();
       break;
 
 
@@ -136,20 +123,63 @@ int AsEngine::On_Timer()
 
    case EGame_State::EGS_Restart_Level:
       if (Platform.Get_State() == EPlatform_State::EPS_Ready)
-      {
-         Game_State = EGame_State::EGS_Play_Level;
-
-         Balls[0].Set_State(EBall_State::EBS_On_Platform, Platform.X_Pos + Platform.Width / 2, AsConfig::Start_Ball_Y_Pos);
-
-         for (int i = 1; i < AsConfig::Max_Balls_Count; ++i)
-            Balls[i].Set_State(EBall_State::EBS_Disabled);
-      }
+         Restart_Level();
       break;
    }
 
    Act();
 
    return 0;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsEngine::Restart_Level()
+{
+   int i;
+
+   Game_State = EGame_State::EGS_Play_Level;
+   
+   for (i = 0; i < 3; ++i)
+      Balls[i].Set_State(EBall_State::EBS_On_Platform, Platform.X_Pos + Platform.Width / 2, AsConfig::Start_Ball_Y_Pos);
+   
+   for (; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Set_State(EBall_State::EBS_Disabled);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsEngine::Play_Level()
+{
+   int i;
+   int active_balls_count = 0;
+   int lost_ball_count = 0;
+
+   for (i = 0; i < AsConfig::Max_Balls_Count; ++i)
+   {
+      if(Balls[i].Get_State() == EBall_State::EBS_Disabled)
+         continue;
+
+      ++active_balls_count;
+
+      if (Balls[i].Get_State() == EBall_State::EBS_Lost)
+      {
+         ++lost_ball_count;
+         continue;
+      }
+
+      Balls[i].Move();
+   }
+
+   if(active_balls_count == lost_ball_count)
+   {// Lost all balls
+
+      Game_State = EGame_State::EGS_Lost_Ball;
+      Level.Stop();
+      Platform.Set_State(EPlatform_State::EPS_Meltdown);
+   }
+
+   if(active_balls_count == 1)
+      if (Balls[0].Is_Test_Finished())
+         Game_State = EGame_State::EGS_Test_Ball; // Only the ball with index 0 participates in repeated tests
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

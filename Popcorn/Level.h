@@ -21,6 +21,7 @@ public:
    void Act();
    void Draw(HDC, RECT &);
    bool Get_Next_Falling_Letter(int &, AFalling_Letter **);
+   void Stop();
 
    static char Level_01[AsConfig::Level_Height][AsConfig::Level_Width];
    static char Test_Level[AsConfig::Level_Height][AsConfig::Level_Width];
@@ -41,8 +42,11 @@ private:
    void Clear_Objects(HDC hdc, RECT &, AGraphics_Object **, int);
    void Draw_Objects(HDC, RECT &, AGraphics_Object **, int);
    void Act_Objects(AGraphics_Object **, int &, const int);
+   void Delete_Objects(AGraphics_Object **, int &, int);
+   void Cancel_All_Activity();
 
    RECT Level_Rect;
+   bool Need_To_Cancel_All;
 
    double Current_Brick_Left_X, Current_Brick_Right_X;
    double Current_Brick_Top_Y, Current_Brick_Low_Y;
