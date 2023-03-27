@@ -4,6 +4,8 @@
 
 enum class EBall_State
 {
+   EBS_Disabled, // Disabled (not drawn, not moved, not interacted)
+
    EBS_Normal,
    EBS_Lost,
    EBS_On_Platform,
@@ -31,7 +33,7 @@ public:
    void Set_For_Test();
    bool Is_Test_Finished();
    EBall_State Get_State();
-   void Set_State(EBall_State, double, double y_pos = Start_Ball_Y_Pos);
+   void Set_State(EBall_State, double x_pos = 0, double y_pos = 0);
    void Get_Center(double &, double &);
    double Get_Direction();
    void Set_Direction(double);
@@ -65,7 +67,6 @@ private:
    RECT Ball_Rect, Prev_Ball_Rect;
    RECT Parachute_Rect, Prev_Parachute_Rect;
 
-   static const double Start_Ball_Y_Pos;
    static const int Parachute_Size = 15;
    static int Hit_Checkers_Count;
    static AHit_Checker *Hit_Checkers[3];

@@ -41,6 +41,7 @@ public:
    static HWND Hwnd;
 
    static const double Moving_Step_Size;
+   static const double Start_Ball_Y_Pos;
 
 	static const int Global_Scale = 3;
    static const int Level_Width = 12; // Level width in cells
@@ -60,4 +61,5 @@ public:
    static const int Max_Active_Bricks_Count = 10;
    static const int Hits_Per_Letter = 1; // Probability of hitting a letter = 1.0 / Hits_Per_Letter
    static const int Max_Falling_Letters_Count = 10;
+   static const int Max_Balls_Count = 10;
 };

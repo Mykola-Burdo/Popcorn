@@ -56,7 +56,7 @@ bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
       else
       {
          if (next_y_pos + ball->Radius > (double)AsConfig::Max_Y_Pos + ball->Radius * 4.0) // In order for the ball to fly below the floor, we check its max_y_pos below the visible border
-            ball->Set_State(EBall_State::EBS_Lost, next_x_pos);
+            ball->Set_State(EBall_State::EBS_Lost);
       }
    }
 

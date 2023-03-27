@@ -53,7 +53,8 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 
    Platform.Draw(hdc, paint_area);
 
-   Ball.Draw(hdc, paint_area);
+   for(int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Draw(hdc, paint_area);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -82,7 +83,10 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
    case EKey_Type::EKT_Space:
       if(Platform.Get_State() == EPlatform_State::EPS_Ready)
       {
-         Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
+         for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+            if(Balls[i].Get_State() == EBall_State::EBS_On_Platform)
+               Balls[i].Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2, AsConfig::Start_Ball_Y_Pos);
+
          Platform.Set_State(EPlatform_State::EPS_Normal);
       }
       break;
@@ -99,22 +103,26 @@ int AsEngine::On_Timer()
    switch (Game_State)
    {
    case EGame_State::EGS_Test_Ball:
-      Ball.Set_For_Test();
+      Balls[0].Set_For_Test(); // Only the ball with index 0 participates in repeated tests
       Game_State = EGame_State::EGS_Play_Level;
       break;
 
 
    case EGame_State::EGS_Play_Level:
-      Ball.Move();
-      
-      if(Ball.Get_State() == EBall_State::EBS_Lost)
+      for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
       {
-         Game_State = EGame_State::EGS_Lost_Ball;
-         Platform.Set_State(EPlatform_State::EPS_Meltdown);
+         Balls[i].Move();
+      
+         if(Balls[i].Get_State() == EBall_State::EBS_Lost)
+         {
+            Game_State = EGame_State::EGS_Lost_Ball;
+            Platform.Set_State(EPlatform_State::EPS_Meltdown);
+         }
       }
 
-      if(Ball.Is_Test_Finished())
-         Game_State = EGame_State::EGS_Test_Ball;
+      if (Balls[0].Is_Test_Finished())
+         Game_State = EGame_State::EGS_Test_Ball; // Only the ball with index 0 participates in repeated tests
+
       break;
 
 
@@ -130,7 +138,11 @@ int AsEngine::On_Timer()
       if (Platform.Get_State() == EPlatform_State::EPS_Ready)
       {
          Game_State = EGame_State::EGS_Play_Level;
-         Ball.Set_State(EBall_State::EBS_On_Platform, Platform.X_Pos + Platform.Width / 2);
+
+         Balls[0].Set_State(EBall_State::EBS_On_Platform, Platform.X_Pos + Platform.Width / 2, AsConfig::Start_Ball_Y_Pos);
+
+         for (int i = 1; i < AsConfig::Max_Balls_Count; ++i)
+            Balls[i].Set_State(EBall_State::EBS_Disabled);
       }
       break;
    }
@@ -159,6 +171,37 @@ void AsEngine::Act()
 
 void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 {
+   switch (falling_letter->Letter_Type)
+   {
+   //case ELetter_Type::ELT_O: // "Cancel"
+   //   break;
+   //case ELetter_Type::ELT_I: // "Inversion"
+   //   break;
+   //case ELetter_Type::ELT_C: // "Speed"
+   //   break;
+   //case ELetter_Type::ELT_M: // "Monsters"
+   //   break;
+   //case ELetter_Type::ELT_G: // "Life"
+   //   break;
+   //case ELetter_Type::ELT_K: // "Glue"
+   //   break;
+   //case ELetter_Type::ELT_W: // "Extension"
+   //   break;
+   //case ELetter_Type::ELT_P: // "Floor"
+   //   break;
+   //case ELetter_Type::ELT_L: // "Laser"
+   //   break;
+
+   case ELetter_Type::ELT_T: // "Three"
+      break;
+
+   //case ELetter_Type::ELT_Plus: // "Moving to the next level"
+   //   break;
+
+   default:
+      AsConfig::Throw();
+   }
+
    falling_letter->Finalize();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------

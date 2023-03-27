@@ -7,10 +7,10 @@ char AsLevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-   1, 1, 1, 1, 1, 1, 1, 1, 0, 10, 10, 0,
-   2, 2, 2, 2, 2, 2, 2, 2, 0, 10, 10, 0,
-   2, 2, 2, 2, 2, 2, 2, 2, 0, 10, 10, 0,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -337,8 +337,8 @@ bool AsLevel::Add_Falling_Letter(int brick_x, int brick_y, EBrick_Type brick_typ
          letter_x = (brick_x * AsConfig::Cell_Width + AsConfig::Level_X_Offset) * AsConfig::Global_Scale;
          letter_y = (brick_y * AsConfig::Cell_Height + AsConfig::Level_Y_Offset) * AsConfig::Global_Scale;
 
-         //letter_type = (ELetter_Type)AsConfig::Rand((int)ELetter_Type::ELT_Max - 1);
-         letter_type = AFalling_Letter::Get_Random_Letter_Type();
+         //letter_type = AFalling_Letter::Get_Random_Letter_Type();
+         letter_type = ELetter_Type::ELT_T;
 
          falling_letter = new AFalling_Letter(brick_type, letter_type, letter_x, letter_y);
          Falling_Letters[i] = falling_letter;
