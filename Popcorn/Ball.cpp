@@ -329,7 +329,7 @@ void ABall::Set_On_Parachute(int brick_x, int brick_y)
 
    Prev_Parachute_Rect = Parachute_Rect;
 
-   Center_X_Pos = (double)(cell_x + AsConfig::Cell_Width / 2) - 1.0 / (double)AsConfig::Global_Scale;
+   Center_X_Pos = (double)(cell_x + AsConfig::Cell_Width / 2) - 1.0 / AsConfig::D_Global_Scale;
    Center_Y_Pos = (double)(cell_y + Parachute_Size) - ABall::Radius * 2.0;
 
    Redraw_Parachute();
@@ -347,10 +347,10 @@ void ABall::Add_Hit_Checker(AHit_Checker *hit_checker)
 
 void ABall::Redraw_Ball()
 {
-   Ball_Rect.left = (int)((Center_X_Pos - Radius) * AsConfig::Global_Scale);
-   Ball_Rect.top = (int)((Center_Y_Pos - Radius) * AsConfig::Global_Scale);
-   Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::Global_Scale);
-   Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::Global_Scale);
+   Ball_Rect.left = (int)((Center_X_Pos - Radius) * AsConfig::D_Global_Scale);
+   Ball_Rect.top = (int)((Center_Y_Pos - Radius) * AsConfig::D_Global_Scale);
+   Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::D_Global_Scale);
+   Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::D_Global_Scale);
 
    InvalidateRect(AsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
    InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);

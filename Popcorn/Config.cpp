@@ -82,6 +82,7 @@ const AColor AsConfig::Advertisement_Red_Table(AsConfig::Red_Color, 2 * AsConfig
 
 HWND AsConfig::Hwnd;
 
+const double AsConfig::D_Global_Scale = (double)Global_Scale;
 const double AsConfig::Moving_Step_Size = 1.0 / AsConfig::Global_Scale;
 const double AsConfig::Start_Ball_Y_Pos = 184.0;
 //-----------------------------------------------------------------------------------------------------------------------------------------------

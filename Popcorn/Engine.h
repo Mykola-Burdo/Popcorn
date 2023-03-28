@@ -30,7 +30,7 @@ public:
    AsEngine();
    void Init(HWND);
    void Draw_Frame(HDC, RECT &);
-   int On_Key_Down(EKey_Type);
+   int On_Key(EKey_Type, bool);
    int On_Timer();
 
 private:

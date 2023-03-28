@@ -171,13 +171,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_LEFT: case 0x41:
-			return Engine.On_Key_Down(EKey_Type::EKT_Left);
+			return Engine.On_Key(EKey_Type::EKT_Left, true);
 
 		case VK_RIGHT: case 0x44:
-			return Engine.On_Key_Down(EKey_Type::EKT_Right);
+			return Engine.On_Key(EKey_Type::EKT_Right, true);
 
 		case VK_SPACE:
-			return Engine.On_Key_Down(EKey_Type::EKT_Space);
+			return Engine.On_Key(EKey_Type::EKT_Space, true);
+		}
+		break;
+
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_LEFT: case 0x41:
+			return Engine.On_Key(EKey_Type::EKT_Left, false);
+
+		case VK_RIGHT: case 0x44:
+			return Engine.On_Key(EKey_Type::EKT_Right, false);
+
+		case VK_SPACE:
+			return Engine.On_Key(EKey_Type::EKT_Space, false);
 		}
 		break;
 
