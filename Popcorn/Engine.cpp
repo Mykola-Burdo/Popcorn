@@ -1,6 +1,61 @@
 #include "Engine.h"
 
+//--------------AsBall_Set--------------------
+void AsBall_Set::Draw(HDC hdc, RECT &paint_area)
+{
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Draw(hdc, paint_area);
+}
 //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsBall_Set::Release_From_Platform(double platform_x_pos)
+{
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+      if (Balls[i].Get_State() == EBall_State::EBS_On_Platform)
+         Balls[i].Set_State(EBall_State::EBS_Normal, platform_x_pos, AsConfig::Start_Ball_Y_Pos);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsBall_Set::Set_On_Platform(double platform_x_pos)
+{
+   int i;
+
+   for (i = 0; i < 3; ++i)
+      Balls[i].Set_State(EBall_State::EBS_On_Platform, platform_x_pos, AsConfig::Start_Ball_Y_Pos);
+
+   for (; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Set_State(EBall_State::EBS_Disabled);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AsBall_Set::All_Balls_Are_Lost()
+{
+   int active_balls_count = 0;
+   int lost_ball_count = 0;
+
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+   {
+      if (Balls[i].Get_State() == EBall_State::EBS_Disabled)
+         continue;
+
+      ++active_balls_count;
+
+      if (Balls[i].Get_State() == EBall_State::EBS_Lost)
+      {
+         ++lost_ball_count;
+         continue;
+      }
+   }
+
+   if (active_balls_count == lost_ball_count)
+      return true;
+   else
+      return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//--------------AsEngine--------------------
 AsEngine::AsEngine()
    : Game_State(EGame_State::EGS_Lost_Ball)
 {
@@ -33,12 +88,14 @@ void AsEngine::Init(HWND hwnd)
    Level.Set_Current_Level(AsLevel::Level_01);
 
    //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
-
    //Platform.Set_State(EPlatform_State::EPS_Normal);
    
    Platform.Redraw_Platform();
 
    SetTimer(AsConfig::Hwnd, Timer_ID, 1000 / AsConfig::FPS, 0);
+
+   memset(Movers, 0, sizeof(Movers));
+   Movers[0] = &Platform;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,13 +105,9 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
    SetGraphicsMode(hdc, GM_ADVANCED);
 
    Level.Draw(hdc, paint_area);
-
    Border.Draw(hdc, paint_area);
-
    Platform.Draw(hdc, paint_area);
-
-   for(int i = 0; i < AsConfig::Max_Balls_Count; ++i)
-      Balls[i].Draw(hdc, paint_area);
+   Ball_Set.Draw(hdc, paint_area);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -76,9 +129,7 @@ int AsEngine::On_Key(EKey_Type key_type, bool key_down)
       if(key_down)
          if(Platform.Get_State() == EPlatform_State::EPS_Ready)
          {
-            for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
-               if(Balls[i].Get_State() == EBall_State::EBS_On_Platform)
-                  Balls[i].Set_State(EBall_State::EBS_Normal, Platform.Get_Middle_Pos(), AsConfig::Start_Ball_Y_Pos);
+            Ball_Set.Release_From_Platform(Platform.Get_Middle_Pos());
 
             Platform.Set_State(EPlatform_State::EPS_Normal);
          }
@@ -96,7 +147,7 @@ int AsEngine::On_Timer()
    switch (Game_State)
    {
    case EGame_State::EGS_Test_Ball:
-      Balls[0].Set_For_Test(); // Only the ball with index 0 participates in repeated tests
+      Ball_Set.Balls[0].Set_For_Test(); // Only the ball with index 0 participates in repeated tests
       Game_State = EGame_State::EGS_Play_Level;
       break;
 
@@ -116,7 +167,10 @@ int AsEngine::On_Timer()
 
    case EGame_State::EGS_Restart_Level:
       if (Platform.Get_State() == EPlatform_State::EPS_Ready)
-         Restart_Level();
+      {
+         Game_State = EGame_State::EGS_Play_Level;
+         Ball_Set.Set_On_Platform(Platform.Get_Middle_Pos());
+      }
       break;
    }
 
@@ -126,59 +180,13 @@ int AsEngine::On_Timer()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsEngine::Restart_Level()
-{
-   int i;
-
-   Game_State = EGame_State::EGS_Play_Level;
-   
-   for (i = 0; i < 3; ++i)
-      Balls[i].Set_State(EBall_State::EBS_On_Platform, Platform.Get_Middle_Pos(), AsConfig::Start_Ball_Y_Pos);
-   
-   for (; i < AsConfig::Max_Balls_Count; ++i)
-      Balls[i].Set_State(EBall_State::EBS_Disabled);
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
 void AsEngine::Play_Level()
 {
-   int i;
    int active_balls_count = 0;
-   int lost_ball_count = 0;
-   double max_speed;
-   double rest_distance;
 
-   // Platform Offset
-   max_speed = fabs(Platform.Speed);
+   Advance_Mover();
 
-   rest_distance = max_speed;
-
-   while(rest_distance > 0.0)
-   {
-      Platform.Advance(max_speed);
-      rest_distance -= AsConfig::Moving_Step_Size;
-   }
-
-   Platform.Redraw_Platform();
-
-   // Ball displacement
-   for (i = 0; i < AsConfig::Max_Balls_Count; ++i)
-   {
-      if(Balls[i].Get_State() == EBall_State::EBS_Disabled)
-         continue;
-
-      ++active_balls_count;
-
-      if (Balls[i].Get_State() == EBall_State::EBS_Lost)
-      {
-         ++lost_ball_count;
-         continue;
-      }
-
-      Balls[i].Move();
-   }
-
-   if(active_balls_count == lost_ball_count)
+   if(Ball_Set.All_Balls_Are_Lost())
    {// Lost all balls
 
       Game_State = EGame_State::EGS_Lost_Ball;
@@ -186,9 +194,41 @@ void AsEngine::Play_Level()
       Platform.Set_State(EPlatform_State::EPS_Meltdown);
    }
 
+   for (int i = 0; i < 3; ++i)
+      Ball_Set.Balls[i].Move();
+
    if(active_balls_count == 1)
-      if (Balls[0].Is_Test_Finished())
+      if (Ball_Set.Balls[0].Is_Test_Finished())
          Game_State = EGame_State::EGS_Test_Ball; // Only the ball with index 0 participates in repeated tests
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsEngine::Advance_Mover()
+{
+   double max_speed = 0.0;
+   double rest_distance = 0.0;
+
+   // Getting the maximum speed of moving objects
+   for (int i = 0; i < AsConfig::Max_Movers_Count; ++i)
+   {
+      if (Movers[i] != 0)
+         if (fabs(Movers[i]->Speed) > max_speed)
+            max_speed = fabs(Movers[i]->Speed);
+   }
+
+   // Move all moving objects
+   rest_distance = max_speed;
+
+   while (rest_distance > 0.0)
+   {
+      for (int i = 0; i < AsConfig::Max_Movers_Count; ++i)
+         if (Movers[i] != 0)
+            Movers[i]->Advance(max_speed);
+
+      rest_distance -= AsConfig::Moving_Step_Size;
+   }
+
+   Platform.Redraw_Platform();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

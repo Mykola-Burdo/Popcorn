@@ -1,5 +1,20 @@
 #include "Platform.h"
 
+//--------------AMover--------------------
+
+AMover::~AMover()
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+AMover::AMover()
+   : Speed(0.0)
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 //--------------AsPlatform--------------------
 AsPlatform::~AsPlatform()
 {
@@ -8,7 +23,7 @@ AsPlatform::~AsPlatform()
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AsPlatform::AsPlatform()
-   : X_Pos(AsConfig::Border_X_Offset), Rolling_Step(0), Speed(0.0), Normal_Platform_Image_Width(0), 
+   : X_Pos(AsConfig::Border_X_Offset), Rolling_Step(0), Normal_Platform_Image_Width(0), 
    Normal_Platform_Image_Height(0), Normal_Platform_Image(0), Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), 
    Platform_State(EPlatform_State::EPS_Missing), Platform_Moving_State(EPlatform_Moving_State::EPMS_Stop), Platform_Rect{}, Prev_Platform_Rect{}, 
    Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192)
@@ -59,6 +74,21 @@ _on_hit:
       ball->Set_State(EBall_State::EBS_Off_Parachute);
 
    return true;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Advance(double max_speed)
+{
+   double max_platform_x = AsConfig::Max_X_Pos - Width + 1;
+
+   X_Pos += Speed / max_speed * AsConfig::Moving_Step_Size;
+
+   if (X_Pos <= AsConfig::Border_X_Offset)
+      X_Pos = AsConfig::Border_X_Offset;
+
+   if (X_Pos >= max_platform_x)
+      X_Pos = max_platform_x;
+
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -223,21 +253,6 @@ bool AsPlatform::Hit_By(AFalling_Letter *falling_letter)
       return true;
    else
       return false;
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-void AsPlatform::Advance(double max_speed)
-{
-   double max_platform_x = AsConfig::Max_X_Pos - Width + 1;
-
-   X_Pos += Speed / max_speed * AsConfig::Moving_Step_Size;
-
-   if (X_Pos <= AsConfig::Border_X_Offset)
-      X_Pos = AsConfig::Border_X_Offset;
-
-   if (X_Pos >= max_platform_x)
-      X_Pos = max_platform_x;
-
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

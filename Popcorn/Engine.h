@@ -11,6 +11,7 @@ enum class EKey_Type
    EKT_Right,
    EKT_Space
 };
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 enum class EGame_State
 {
@@ -20,10 +21,23 @@ enum class EGame_State
    EGS_Lost_Ball,
    EGS_Restart_Level
 };
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 const int Timer_ID = WM_USER + 1;
-
 //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AsBall_Set
+{
+public:
+   void Draw(HDC, RECT &);
+   void Release_From_Platform(double);
+   void Set_On_Platform(double);
+   bool All_Balls_Are_Lost();
+
+   ABall Balls[AsConfig::Max_Balls_Count];
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 class AsEngine
 {
 public:
@@ -34,8 +48,8 @@ public:
    int On_Timer();
 
 private:
-   void Restart_Level();
    void Play_Level();
+   void Advance_Mover();
    void Act();
    void On_Falling_Letter(AFalling_Letter *);
 
@@ -45,6 +59,7 @@ private:
    AsLevel Level;
    AsPlatform Platform;
    AsBorder Border;
+   AsBall_Set Ball_Set;
 
-   ABall Balls[AsConfig::Max_Balls_Count];
+   AMover *Movers[AsConfig::Max_Movers_Count];
 };

@@ -63,4 +63,5 @@ public:
    static const int Hits_Per_Letter = 1; // Probability of hitting a letter = 1.0 / Hits_Per_Letter
    static const int Max_Falling_Letters_Count = 10;
    static const int Max_Balls_Count = 10;
+   static const int Max_Movers_Count = 10;
 };
