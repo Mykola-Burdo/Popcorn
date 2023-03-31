@@ -21,18 +21,6 @@ enum class EPlatform_Moving_State
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AMover
-{
-public:
-   virtual ~AMover();
-   AMover();
-
-   virtual void Advance(double) = 0;
-
-   double Speed;
-};
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
 class AsPlatform : public AHit_Checker, public AMover
 {
 public:
@@ -40,7 +28,10 @@ public:
    AsPlatform();
 
    virtual bool Check_Hit(double, double, ABall *);
+   virtual void Begin_Movement();
+   virtual void Finish_Movement();
    virtual void Advance(double);
+   virtual double Get_Speed();
 
    void Act();
    EPlatform_State Get_State();
@@ -69,6 +60,7 @@ private:
    int Inner_Width;
    int Rolling_Step;
    double X_Pos;
+   double Speed;
 
    int Normal_Platform_Image_Width, Normal_Platform_Image_Height;
    int *Normal_Platform_Image; // Platform image pixels on background
@@ -88,5 +80,5 @@ private:
    static const int Max_Rolling_Step = 16;
    static const int Roll_In_Platform_End_X_Pos = 99;
    static const int Rolling_Platform_Speed = 3;
-   static const int X_Step = AsConfig::Global_Scale * 2;
+   static const int X_Step = 6;
 };

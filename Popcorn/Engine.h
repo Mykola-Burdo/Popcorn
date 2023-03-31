@@ -26,14 +26,22 @@ enum class EGame_State
 const int Timer_ID = WM_USER + 1;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AsBall_Set
+class AsBall_Set : public AMover
 {
 public:
+   virtual void Begin_Movement();
+   virtual void Finish_Movement();
+   virtual void Advance(double);
+   virtual double Get_Speed();
+
    void Draw(HDC, RECT &);
    void Release_From_Platform(double);
    void Set_On_Platform(double);
    bool All_Balls_Are_Lost();
+   void Set_For_Test();
+   bool Is_Test_Finished();
 
+private:
    ABall Balls[AsConfig::Max_Balls_Count];
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,6 +62,7 @@ private:
    void On_Falling_Letter(AFalling_Letter *);
 
    EGame_State Game_State;
+   double Rest_Distance;
 
    //ABall Ball;
    AsLevel Level;

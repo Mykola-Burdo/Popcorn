@@ -23,13 +23,30 @@ public:
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class ABall
+class AMover
+{
+public:
+   virtual ~AMover();
+
+   virtual void Begin_Movement() = 0;
+   virtual void Finish_Movement() = 0;
+   virtual void Advance(double) = 0;
+   virtual double Get_Speed() = 0;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class ABall : public AMover
 {
 public:
    ABall();
+
+   virtual void Begin_Movement();
+   virtual void Finish_Movement();
+   virtual void Advance(double);
+   virtual double Get_Speed();
+
    void Draw(HDC, RECT &);
    void Draw_Teleporting(HDC, int);
-   void Move();
    void Set_For_Test();
    bool Is_Test_Finished();
    EBall_State Get_State();
@@ -44,8 +61,6 @@ public:
 
    static void Add_Hit_Checker(AHit_Checker *);
 
-   double Ball_Speed;
-
    static const double Radius;
 
 private:
@@ -57,8 +72,9 @@ private:
    EBall_State Ball_State, Prev_Ball_State;
 
    double Center_X_Pos, Center_Y_Pos;
-   double Rest_Distance;
+   //double Rest_Distance;
    double Ball_Direction;
+   double Ball_Speed;
 
    bool Testing_Is_Active;
    int Test_Iteration;

@@ -1,6 +1,43 @@
 #include "Engine.h"
 
 //--------------AsBall_Set--------------------
+void AsBall_Set::Begin_Movement()
+{
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Begin_Movement();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsBall_Set::Finish_Movement()
+{
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Finish_Movement();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsBall_Set::Advance(double max_speed)
+{
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+      Balls[i].Advance(max_speed);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+double AsBall_Set::Get_Speed()
+{
+   double curr_speed, max_speed = 0.0;
+
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+   {
+      curr_speed = Balls[i].Get_Speed();
+
+      if(curr_speed > max_speed)
+         max_speed = curr_speed;
+   }
+
+   return max_speed;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 void AsBall_Set::Draw(HDC hdc, RECT &paint_area)
 {
    for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
@@ -54,10 +91,22 @@ bool AsBall_Set::All_Balls_Are_Lost()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void AsBall_Set::Set_For_Test()
+{
+   Balls[0].Set_For_Test(); // Only the ball with index 0 participates in repeated tests
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AsBall_Set::Is_Test_Finished()
+{
+   return Balls[0].Is_Test_Finished();  // Only the ball with index 0 participates in repeated tests
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 //--------------AsEngine--------------------
 AsEngine::AsEngine()
-   : Game_State(EGame_State::EGS_Lost_Ball)
+   : Game_State(EGame_State::EGS_Lost_Ball), Rest_Distance(0)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -96,6 +145,7 @@ void AsEngine::Init(HWND hwnd)
 
    memset(Movers, 0, sizeof(Movers));
    Movers[0] = &Platform;
+   Movers[1] = &Ball_Set;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -147,7 +197,7 @@ int AsEngine::On_Timer()
    switch (Game_State)
    {
    case EGame_State::EGS_Test_Ball:
-      Ball_Set.Balls[0].Set_For_Test(); // Only the ball with index 0 participates in repeated tests
+      Ball_Set.Set_For_Test();
       Game_State = EGame_State::EGS_Play_Level;
       break;
 
@@ -182,8 +232,6 @@ int AsEngine::On_Timer()
 
 void AsEngine::Play_Level()
 {
-   int active_balls_count = 0;
-
    Advance_Mover();
 
    if(Ball_Set.All_Balls_Are_Lost())
@@ -194,41 +242,45 @@ void AsEngine::Play_Level()
       Platform.Set_State(EPlatform_State::EPS_Meltdown);
    }
 
-   for (int i = 0; i < 3; ++i)
-      Ball_Set.Balls[i].Move();
-
-   if(active_balls_count == 1)
-      if (Ball_Set.Balls[0].Is_Test_Finished())
-         Game_State = EGame_State::EGS_Test_Ball; // Only the ball with index 0 participates in repeated tests
+   if (Ball_Set.Is_Test_Finished())
+      Game_State = EGame_State::EGS_Test_Ball;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 void AsEngine::Advance_Mover()
 {
-   double max_speed = 0.0;
-   double rest_distance = 0.0;
+   double curr_speed, max_speed = 0.0;
 
    // Getting the maximum speed of moving objects
    for (int i = 0; i < AsConfig::Max_Movers_Count; ++i)
    {
       if (Movers[i] != 0)
-         if (fabs(Movers[i]->Speed) > max_speed)
-            max_speed = fabs(Movers[i]->Speed);
+      {
+         Movers[i]->Begin_Movement();
+
+         curr_speed = fabs(Movers[i]->Get_Speed());
+
+         if (curr_speed > max_speed)
+            max_speed = curr_speed;
+      }
    }
 
    // Move all moving objects
-   rest_distance = max_speed;
+   Rest_Distance += max_speed;
 
-   while (rest_distance > 0.0)
+   while (Rest_Distance > 0.0)
    {
       for (int i = 0; i < AsConfig::Max_Movers_Count; ++i)
          if (Movers[i] != 0)
             Movers[i]->Advance(max_speed);
 
-      rest_distance -= AsConfig::Moving_Step_Size;
+      Rest_Distance -= AsConfig::Moving_Step_Size;
    }
 
-   Platform.Redraw_Platform();
+   // All movements on this frame end
+   for (int i = 0; i < AsConfig::Max_Movers_Count; ++i)
+      if (Movers[i] != 0)
+         Movers[i]->Finish_Movement();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

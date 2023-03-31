@@ -1,20 +1,5 @@
 #include "Platform.h"
 
-//--------------AMover--------------------
-
-AMover::~AMover()
-{
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-AMover::AMover()
-   : Speed(0.0)
-{
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
 //--------------AsPlatform--------------------
 AsPlatform::~AsPlatform()
 {
@@ -77,18 +62,35 @@ _on_hit:
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void AsPlatform::Begin_Movement()
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Finish_Movement()
+{
+   Redraw_Platform();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 void AsPlatform::Advance(double max_speed)
 {
    double max_platform_x = AsConfig::Max_X_Pos - Width + 1;
+   double next_step = Speed / max_speed * AsConfig::Moving_Step_Size;
 
-   X_Pos += Speed / max_speed * AsConfig::Moving_Step_Size;
+   X_Pos += next_step;
 
    if (X_Pos <= AsConfig::Border_X_Offset)
       X_Pos = AsConfig::Border_X_Offset;
 
    if (X_Pos >= max_platform_x)
       X_Pos = max_platform_x;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
+double AsPlatform::Get_Speed()
+{
+   return Speed;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -484,7 +486,7 @@ bool AsPlatform::Reflect_On_Circle(double next_x_pos, double next_y_pos, double 
    distance = sqrt(pow(dx, 2) + pow(dy, 2));
    two_radiuses = platform_ball_radius + ball->Radius;
 
-   if (fabs(distance - two_radiuses) < AsConfig::Moving_Step_Size)
+   if(distance + AsConfig::Moving_Step_Size < two_radiuses)
    {// The ball touched the side ball on the platform
 
       beta = atan2(-dy, dx);
