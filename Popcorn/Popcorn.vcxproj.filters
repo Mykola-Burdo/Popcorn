@@ -25,9 +25,6 @@
     <Filter Include="Level">
       <UniqueIdentifier>{dfeb6fe7-0527-4eb4-bced-656e0d3e540d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Bordel">
-      <UniqueIdentifier>{691b9669-1bf4-4d6e-9392-cfd710b35506}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{ef9d2909-066b-4032-9fb6-4f7b429604c0}</UniqueIdentifier>
     </Filter>
@@ -42,6 +39,9 @@
     </Filter>
     <Filter Include="Ball_Set">
       <UniqueIdentifier>{2a4da538-71b8-4150-ba99-b51ef61290b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Border">
+      <UniqueIdentifier>{691b9669-1bf4-4d6e-9392-cfd710b35506}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -64,7 +64,7 @@
       <Filter>Ball</Filter>
     </ClInclude>
     <ClInclude Include="Border.h">
-      <Filter>Bordel</Filter>
+      <Filter>Border</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
       <Filter>Level</Filter>
@@ -109,7 +109,7 @@
       <Filter>Ball</Filter>
     </ClCompile>
     <ClCompile Include="Border.cpp">
-      <Filter>Bordel</Filter>
+      <Filter>Border</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
       <Filter>Level</Filter>

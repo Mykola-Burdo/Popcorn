@@ -223,8 +223,11 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
    //   break;
    //case ELetter_Type::ELT_W: // "Extension"
    //   break;
-   //case ELetter_Type::ELT_P: // "Floor"
-   //   break;
+   case ELetter_Type::ELT_P: // "Floor"
+      AsConfig::Level_Has_Floor = true;
+      Border.Redraw_Floor();
+      // !!! Display on indicator
+      break;
    //case ELetter_Type::ELT_L: // "Laser"
    //   break;
 

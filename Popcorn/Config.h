@@ -68,4 +68,5 @@ public:
    static const int Max_Movers_Count = 10;
    static const int Initial_Life_Count = 5;
    static const int Max_Life_Count = 12;
+   static const int Floor_Y_Pos = Max_Y_Pos - 1;
 };
