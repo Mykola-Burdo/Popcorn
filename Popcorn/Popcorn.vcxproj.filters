@@ -40,6 +40,9 @@
     <Filter Include="Falling_Letter">
       <UniqueIdentifier>{75aa971a-f92c-4271-913a-9ef0b7759e65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ball_Set">
+      <UniqueIdentifier>{2a4da538-71b8-4150-ba99-b51ef61290b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -77,6 +80,9 @@
     </ClInclude>
     <ClInclude Include="Falling_Letter.h">
       <Filter>Falling_Letter</Filter>
+    </ClInclude>
+    <ClInclude Include="Ball_Set.h">
+      <Filter>Ball_Set</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="Falling_Letter.cpp">
       <Filter>Falling_Letter</Filter>
+    </ClCompile>
+    <ClCompile Include="Ball_Set.cpp">
+      <Filter>Ball_Set</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

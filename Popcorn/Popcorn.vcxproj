@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="Active_Brick.h" />
     <ClInclude Include="Ball.h" />
+    <ClInclude Include="Ball_Set.h" />
     <ClInclude Include="Border.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Engine.h" />
@@ -156,6 +157,7 @@
   <ItemGroup>
     <ClCompile Include="Active_Brick.cpp" />
     <ClCompile Include="Ball.cpp" />
+    <ClCompile Include="Ball_Set.cpp" />
     <ClCompile Include="Border.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Engine.cpp" />

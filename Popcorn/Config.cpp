@@ -85,6 +85,8 @@ HWND AsConfig::Hwnd;
 const double AsConfig::D_Global_Scale = (double)Global_Scale;
 const double AsConfig::Moving_Step_Size = 1.0 / AsConfig::Global_Scale;
 const double AsConfig::Start_Ball_Y_Pos = 184.0;
+const double AsConfig::Ball_Acceleration = 1.001;
+const double AsConfig::Normal_Ball_Speed = 3.0;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 int AsConfig::Rand(int range)

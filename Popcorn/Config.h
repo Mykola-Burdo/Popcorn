@@ -43,6 +43,8 @@ public:
    static const double D_Global_Scale;
    static const double Moving_Step_Size;
    static const double Start_Ball_Y_Pos;
+   static const double Ball_Acceleration;
+   static const double Normal_Ball_Speed;
 
 	static const int Global_Scale = 3;
    static const int Level_Width = 12; // Level width in cells
@@ -64,4 +66,6 @@ public:
    static const int Max_Falling_Letters_Count = 10;
    static const int Max_Balls_Count = 10;
    static const int Max_Movers_Count = 10;
+   static const int Initial_Life_Count = 5;
+   static const int Max_Life_Count = 12;
 };

@@ -111,6 +111,12 @@ double ABall::Get_Speed()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void ABall::Set_Speed(double new_speed)
+{
+   Ball_Speed = new_speed;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 void ABall::Draw(HDC hdc, RECT& paint_area)
 {
    RECT intersection_rect;
@@ -220,7 +226,7 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
    case EBall_State::EBS_Normal:
       Center_X_Pos = x_pos;
       Center_Y_Pos = y_pos;
-      Ball_Speed = 3.0;
+      Ball_Speed = AsConfig::Normal_Ball_Speed;
       //Rest_Distance = 0.0;
       Ball_Direction = M_PI_4;
       Redraw_Ball();

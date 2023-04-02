@@ -121,6 +121,10 @@ void AsPlatform::Set_State(EPlatform_State new_state)
 
    switch(new_state)
    {
+   case EPlatform_State::EPS_Pre_Meltdown:
+      Speed = 0.0;
+      break;
+
    case EPlatform_State::EPS_Meltdown:
       len = sizeof(Meltdown_Platform_Y_Pos) / sizeof(Meltdown_Platform_Y_Pos[0]);
 
@@ -177,6 +181,11 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
    case EPlatform_State::EPS_Ready:
    case EPlatform_State::EPS_Normal:
       Draw_Normal_State(hdc, paint_area);
+      break;
+
+   case EPlatform_State::EPS_Pre_Meltdown:
+      Draw_Normal_State(hdc, paint_area);
+      Set_State(EPlatform_State::EPS_Meltdown);
       break;
 
    case EPlatform_State::EPS_Meltdown:

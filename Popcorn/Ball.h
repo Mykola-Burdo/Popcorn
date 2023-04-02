@@ -45,6 +45,7 @@ public:
    virtual void Advance(double);
    virtual double Get_Speed();
 
+   void Set_Speed(double);
    void Draw(HDC, RECT &);
    void Draw_Teleporting(HDC, int);
    void Set_For_Test();
