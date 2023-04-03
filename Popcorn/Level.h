@@ -8,7 +8,7 @@ struct SPoint
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AsLevel : public AHit_Checker
+class AsLevel : public AHit_Checker, public AGraphics_Object
 {
 public:
    ~AsLevel();
@@ -16,10 +16,13 @@ public:
 
    virtual bool Check_Hit(double, double, ABall*);
 
+   virtual void Act();
+   virtual void Clear(HDC, RECT &);
+   virtual void Draw(HDC, RECT &);
+   virtual bool Is_Finished();
+
    void Init();
    void Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Level_Width]);
-   void Act();
-   void Draw(HDC, RECT &);
    bool Get_Next_Falling_Letter(int &, AFalling_Letter **);
    void Stop();
 

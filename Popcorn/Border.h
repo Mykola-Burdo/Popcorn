@@ -3,14 +3,18 @@
 #include "Ball.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
-class AsBorder : public AHit_Checker
+class AsBorder : public AHit_Checker, public AGraphics_Object
 {
 public:
    AsBorder();
 
    virtual bool Check_Hit(double, double, ABall *);
 
-   void Draw(HDC, RECT &);
+   virtual void Act();
+   virtual void Clear(HDC, RECT &);
+   virtual void Draw(HDC, RECT &);
+   virtual bool Is_Finished();
+
    void Redraw_Floor();
 
 private:

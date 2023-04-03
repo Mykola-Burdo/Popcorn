@@ -35,7 +35,19 @@ public:
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class ABall : public AMover
+class AGraphics_Object
+{
+public:
+   virtual ~AGraphics_Object();
+
+   virtual void Act() = 0;
+   virtual void Clear(HDC, RECT &) = 0;
+   virtual void Draw(HDC, RECT &) = 0;
+   virtual bool Is_Finished() = 0;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class ABall : public AMover, public AGraphics_Object
 {
 public:
    ABall();
@@ -45,8 +57,12 @@ public:
    virtual void Advance(double);
    virtual double Get_Speed();
 
+   virtual void Act();
+   virtual void Clear(HDC, RECT &);
+   virtual void Draw(HDC, RECT &);
+   virtual bool Is_Finished();
+
    void Set_Speed(double);
-   void Draw(HDC, RECT &);
    void Draw_Teleporting(HDC, int);
    void Set_For_Test();
    bool Is_Test_Finished();

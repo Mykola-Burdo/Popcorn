@@ -1,5 +1,8 @@
 #include "Ball.h"
 
+
+
+
 //--------------AHit_Checker--------------------
 bool AHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double& x)
 {// Checks the intersection of a horizontal segment (passing from left_x to right_x through y) with a circle of radius radius
@@ -35,6 +38,15 @@ AMover::~AMover()
 
 
 
+//--------------AGraphics_Object--------------------
+AGraphics_Object::~AGraphics_Object()
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 //--------------ABall--------------------
 const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
 int ABall::Hit_Checkers_Count = 0;
@@ -56,6 +68,9 @@ void ABall::Begin_Movement()
 
 void ABall::Finish_Movement()
 {
+   if(Ball_State == EBall_State::EBS_Disabled || Ball_State == EBall_State::EBS_Lost)
+      return;
+
    Redraw_Ball();
 
    if (Ball_State == EBall_State::EBS_On_Parachute)
@@ -111,9 +126,29 @@ double ABall::Get_Speed()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void ABall::Set_Speed(double new_speed)
+void ABall::Act()
 {
-   Ball_Speed = new_speed;
+   // Stub. Not used, because the ball itself does nothing (does not animate)
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ABall::Clear(HDC hdc, RECT &paint_area)
+{
+   RECT intersection_rect;
+
+   if (Ball_State == EBall_State::EBS_Disabled)
+      return;
+
+   if ((Ball_State == EBall_State::EBS_Teleporting || Ball_State == EBall_State::EBS_Lost) && Ball_State == Prev_Ball_State)
+      return;
+
+   // Background cleaning
+   if (IntersectRect(&intersection_rect, &paint_area, &Prev_Ball_Rect))
+   {
+      AsConfig::BG_Color.Select(hdc);
+
+      Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
+   }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -124,16 +159,8 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
    if (Ball_State == EBall_State::EBS_Disabled)
       return;
 
-   if((Ball_State == EBall_State::EBS_Teleporting || Ball_State == EBall_State::EBS_Lost) && Ball_State == Prev_Ball_State)
+   if ((Ball_State == EBall_State::EBS_Teleporting || Ball_State == EBall_State::EBS_Lost) && Ball_State == Prev_Ball_State)
       return;
-
-   // Background cleaning
-   if(IntersectRect(&intersection_rect, &paint_area, &Prev_Ball_Rect))
-   {
-      AsConfig::BG_Color.Select(hdc);
-
-      Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
-   }
 
    switch (Ball_State)
    {
@@ -147,15 +174,13 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
       break;
 
    case EBall_State::EBS_Lost:
-      if(Prev_Ball_State == EBall_State::EBS_On_Parachute)
+      if (Prev_Ball_State == EBall_State::EBS_On_Parachute)
          Clear_Parachute(hdc);
       return;
 
    case EBall_State::EBS_Teleporting:
       return;
    }
-
-      
 
    // Drawing a ball
    if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))
@@ -164,6 +189,18 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
 
       Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right - 1, Ball_Rect.bottom - 1);
    }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ABall::Is_Finished()
+{
+   return false; // Stub. Not used, because the ball itself does nothing (does not animate)
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ABall::Set_Speed(double new_speed)
+{
+   Ball_Speed = new_speed;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

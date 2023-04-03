@@ -16,29 +16,34 @@ enum class EPlatform_State
 
 enum class EPlatform_Moving_State
 {
+   EPMS_Stopping,
    EPMS_Stop,
    EPMS_Moving_Left,
    EPMS_Moving_Right
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AsPlatform : public AHit_Checker, public AMover
+class AsPlatform : public AHit_Checker, public AMover, public AGraphics_Object
 {
 public:
    ~AsPlatform();
    AsPlatform();
 
    virtual bool Check_Hit(double, double, ABall *);
+
    virtual void Begin_Movement();
    virtual void Finish_Movement();
    virtual void Advance(double);
    virtual double Get_Speed();
 
-   void Act();
+   virtual void Act();
+   virtual void Clear(HDC, RECT &);
+   virtual void Draw(HDC, RECT &);
+   virtual bool Is_Finished();
+
    EPlatform_State Get_State();
    void Set_State(EPlatform_State);
    void Redraw_Platform();
-   void Draw(HDC, RECT &);
    void Move(bool, bool);
    bool Hit_By(AFalling_Letter *);
    double Get_Middle_Pos();
@@ -46,7 +51,6 @@ public:
    int Width;
 
 private:
-   void Clear_BG(HDC hdc);
    void Draw_Circle_Highlight(HDC, int, int);
    void Draw_Normal_State(HDC, RECT &);
    void Draw_Meltdown_State(HDC, RECT &);
@@ -58,6 +62,7 @@ private:
 
    EPlatform_State Platform_State;
    EPlatform_Moving_State Platform_Moving_State;
+   bool Left_Key_Down, Right_Key_Down;
    int Inner_Width;
    int Rolling_Step;
    double X_Pos;

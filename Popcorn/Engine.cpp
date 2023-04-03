@@ -5,7 +5,7 @@
 
 //--------------AsEngine--------------------
 AsEngine::AsEngine()
-   : Game_State(EGame_State::EGS_Lost_Ball), Rest_Distance(0), Life_Count(AsConfig::Initial_Life_Count)
+   : Game_State(EGame_State::EGS_Lost_Ball), Rest_Distance(0), Life_Count(AsConfig::Initial_Life_Count), Movers{}, Modules{}
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,9 +42,17 @@ void AsEngine::Init(HWND hwnd)
 
    SetTimer(AsConfig::Hwnd, Timer_ID, 1000 / AsConfig::FPS, 0);
 
+   // Movers
    memset(Movers, 0, sizeof(Movers));
    Movers[0] = &Platform;
    Movers[1] = &Ball_Set;
+
+   // Modules
+   memset(Modules, 0, sizeof(Modules));
+   Modules[0] = &Level;
+   Modules[1] = &Border;
+   Modules[3] = &Platform;
+   Modules[4] = &Ball_Set;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -53,10 +61,13 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 
    SetGraphicsMode(hdc, GM_ADVANCED);
 
-   Level.Draw(hdc, paint_area);
-   Border.Draw(hdc, paint_area);
-   Platform.Draw(hdc, paint_area);
-   Ball_Set.Draw(hdc, paint_area);
+   for (int i = 0; i < AsConfig::Max_Modules_Count; ++i)
+      if (Modules[i] != 0)
+         Modules[i]->Clear(hdc, paint_area);
+
+   for(int i = 0; i < AsConfig::Max_Modules_Count; ++i)
+      if(Modules[i] != 0)
+         Modules[i]->Draw(hdc, paint_area);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

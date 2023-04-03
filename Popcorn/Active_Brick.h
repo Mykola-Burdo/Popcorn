@@ -29,18 +29,6 @@ enum class EDirection_Type
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-class AGraphics_Object
-{
-public:
-	virtual ~AGraphics_Object();
-
-	virtual void Act() = 0;
-	virtual void Clear(HDC, RECT &) = 0;
-	virtual void Draw(HDC, RECT &) = 0;
-	virtual bool Is_Finished() = 0;
-};
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
 class AActive_Brick : public AGraphics_Object
 {
 public:
