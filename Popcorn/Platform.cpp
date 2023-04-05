@@ -1,6 +1,9 @@
 #include "Platform.h"
 
 //--------------AsPlatform--------------------
+const double AsPlatform::Max_Glue_Spot_Height_Ratio = 1.0;
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 AsPlatform::~AsPlatform()
 {
    delete[] Normal_Platform_Image;
@@ -8,10 +11,11 @@ AsPlatform::~AsPlatform()
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AsPlatform::AsPlatform()
-   : X_Pos(AsConfig::Border_X_Offset), Rolling_Step(0), Normal_Platform_Image_Width(0), Normal_Platform_Image_Height(0), 
-   Normal_Platform_Image(0), Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), Platform_State(EPlatform_State::EPS_Missing), 
-   Platform_Moving_State(EPlatform_Moving_State::EPMS_Stop), Left_Key_Down(false), Right_Key_Down(false), Platform_Rect{}, Prev_Platform_Rect{}, 
-   Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192)
+   : X_Pos(AsConfig::Border_X_Offset), Normal_Platform_Image_Width(0), Normal_Platform_Image_Height(0), Normal_Platform_Image(0), 
+   Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), 
+   Platform_State(EPlatform_State::EPS_Missing), Platform_Moving_State(EPlatform_Moving_State::EPMS_Stop), Left_Key_Down(false), 
+   Right_Key_Down(false), Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0), 
+   Platform_Inner_Color(0, 128, 192)
 {
    X_Pos = (AsConfig::Max_X_Pos - Width) / 2;
 }
@@ -121,6 +125,18 @@ void AsPlatform::Act()
    case EPlatform_State::EPS_Roll_In:
    case EPlatform_State::EPS_Expand_Roll_In:
       Redraw_Platform();
+      break;
+
+   case EPlatform_State::EPS_Glue_Init:
+      if(Glue_Spot_Height_Ratio < Max_Glue_Spot_Height_Ratio)
+      {
+         Glue_Spot_Height_Ratio += 0.05;
+         Redraw_Platform(false);
+      }
+      else
+         Platform_State = EPlatform_State::EPS_Glue;
+
+      break;
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +145,7 @@ void AsPlatform::Clear(HDC hdc, RECT &paint_area)
 {
    RECT intersection_rect;
 
-   if (!IntersectRect(&intersection_rect, &paint_area, &Platform_Rect))
+   if (!IntersectRect(&intersection_rect, &paint_area, &Prev_Platform_Rect))
       return;
 
    switch (Platform_State)
@@ -139,6 +155,9 @@ void AsPlatform::Clear(HDC hdc, RECT &paint_area)
    case EPlatform_State::EPS_Pre_Meltdown:
    case EPlatform_State::EPS_Roll_In:
    case EPlatform_State::EPS_Expand_Roll_In:
+   case EPlatform_State::EPS_Glue_Init:
+   case EPlatform_State::EPS_Glue:
+   case EPlatform_State::EPS_Glue_Finalize:
       // Cleaning up the background
       AsConfig::BG_Color.Select(hdc);
       Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
@@ -176,6 +195,12 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 
    case EPlatform_State::EPS_Expand_Roll_In:
       Draw_Expanding_Roll_In_State(hdc, paint_area);
+      break;
+
+   case EPlatform_State::EPS_Glue_Init:
+   case EPlatform_State::EPS_Glue:
+   case EPlatform_State::EPS_Glue_Finalize:
+      Draw_Glue_State(hdc, paint_area);
       break;
    }
 }
@@ -218,31 +243,44 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       X_Pos = AsConfig::Max_X_Pos - 1;
       Rolling_Step = Max_Rolling_Step - 1;
       break;
+
+   case EPlatform_State::EPS_Glue_Init:
+      Glue_Spot_Height_Ratio = 0.4;
+      break;
+
+   //case EPlatform_State::EPS_Glue:
+   //   break;
+
+   //case EPlatform_State::EPS_Glue_Finalize:
+   //   break;
    }
       
    Platform_State = new_state;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsPlatform::Redraw_Platform()
+void AsPlatform::Redraw_Platform(bool update_rect)
 {
    int platform_width;
 
-   Prev_Platform_Rect = Platform_Rect;
+   if(update_rect)
+   {
+      Prev_Platform_Rect = Platform_Rect;
 
-   if (Platform_State == EPlatform_State::EPS_Roll_In)
-      platform_width = Circle_Size;
-   else
-      platform_width = Width;
+      if (Platform_State == EPlatform_State::EPS_Roll_In)
+         platform_width = Circle_Size;
+      else
+         platform_width = Width;
 
-   Platform_Rect.left = (int)(X_Pos * AsConfig::D_Global_Scale);
-   Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
-   Platform_Rect.right = Platform_Rect.left + platform_width * AsConfig::Global_Scale;
-   Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
+      Platform_Rect.left = (int)(X_Pos * AsConfig::D_Global_Scale);
+      Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
+      Platform_Rect.right = Platform_Rect.left + platform_width * AsConfig::Global_Scale;
+      Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
 
 
-   if(Platform_State == EPlatform_State::EPS_Meltdown)
-      Prev_Platform_Rect.bottom = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale;
+      if(Platform_State == EPlatform_State::EPS_Meltdown)
+         Prev_Platform_Rect.bottom = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale;
+   }
 
    InvalidateRect(AsConfig::Hwnd, &Prev_Platform_Rect, FALSE);
    InvalidateRect(AsConfig::Hwnd, &Platform_Rect, FALSE);
@@ -251,7 +289,7 @@ void AsPlatform::Redraw_Platform()
 
 void AsPlatform::Move(bool to_left, bool key_down)
 {
-   if(Platform_State != EPlatform_State::EPS_Normal)
+   if(!(Platform_State == EPlatform_State::EPS_Normal || Platform_State == EPlatform_State::EPS_Glue_Init || Platform_State == EPlatform_State::EPS_Glue || Platform_State == EPlatform_State::EPS_Glue_Finalize))
       return;
 
    if (to_left)
@@ -487,6 +525,55 @@ void AsPlatform::Draw_Expanding_Roll_In_State(HDC hdc, RECT &paint_area)
       Platform_State = EPlatform_State::EPS_Ready;
       Redraw_Platform();
    }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Draw_Glue_State(HDC hdc, RECT &paint_area)
+{// Draw a platform with spreading glue
+
+   HRGN region;
+   RECT glue_rect;
+
+   Draw_Normal_State(hdc, paint_area);
+
+   glue_rect.left = (int)((X_Pos + 5.0) * AsConfig::D_Global_Scale);
+   glue_rect.top = (AsConfig::Platform_Y_Pos + 1) * AsConfig::Global_Scale;
+   glue_rect.right = glue_rect.left + Normal_Platform_Inner_Width * AsConfig::Global_Scale;
+   glue_rect.bottom = glue_rect.top + (Height - 2) * AsConfig::Global_Scale;
+
+   region = CreateRectRgnIndirect(&glue_rect);
+   SelectClipRgn(hdc, region);
+
+   AsConfig::BG_Color.Select(hdc);
+   Draw_Glue_Spot(hdc, 0, 9, 5);
+   Draw_Glue_Spot(hdc, 6, 6, 5);
+   Draw_Glue_Spot(hdc, 9, 9, 6);
+
+   AsConfig::White_Color.Select(hdc);
+   Draw_Glue_Spot(hdc, 0, 9, 4);
+   Draw_Glue_Spot(hdc, 6, 6, 4);
+   Draw_Glue_Spot(hdc, 9, 9, 5);
+
+   SelectClipRgn(hdc, 0);
+   DeleteObject(region);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Draw_Glue_Spot(HDC hdc, int x_offset, int width, int height)
+{// Draw a spot of glue
+
+   RECT spot_rect;
+   int platform_top = (AsConfig::Platform_Y_Pos + 1) * AsConfig::Global_Scale;
+   int spot_height = (int)((double)height * AsConfig::D_Global_Scale * Glue_Spot_Height_Ratio);
+
+   // Draw a semi-ellipse as a "spot" of glue
+
+   spot_rect.left = (int)((X_Pos + 5.0 + (double)x_offset) * AsConfig::D_Global_Scale);
+   spot_rect.top = platform_top - spot_height;
+   spot_rect.right = spot_rect.left + width * AsConfig::Global_Scale;
+   spot_rect.bottom = platform_top + spot_height - AsConfig::Global_Scale;
+
+   Chord(hdc, spot_rect.left, spot_rect.top, spot_rect.right - 1, spot_rect.bottom - 1, spot_rect.left, platform_top - 1, spot_rect.right - 1, platform_top - 1);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

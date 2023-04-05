@@ -130,6 +130,7 @@ int AsEngine::On_Timer()
       {
          Game_State = EGame_State::EGS_Play_Level;
          Ball_Set.Set_On_Platform(Platform.Get_Middle_Pos());
+         Platform.Set_State(EPlatform_State::EPS_Glue_Init);
       }
       break;
    }
