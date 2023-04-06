@@ -26,6 +26,7 @@ void AsEngine::Init(HWND hwnd)
    AActive_Brick_Red_Blue::Setup_Colors();
 
    Level.Init();
+   Platform.Init(&Ball_Set);
 
    AFalling_Letter::Init();
 
@@ -86,13 +87,7 @@ int AsEngine::On_Key(EKey_Type key_type, bool key_down)
 
 
    case EKey_Type::EKT_Space:
-      if(key_down)
-         if(Platform.Get_State() == EPlatform_State::EPS_Ready)
-         {
-            Ball_Set.Release_From_Platform(Platform.Get_Middle_Pos());
-
-            Platform.Set_State(EPlatform_State::EPS_Normal);
-         }
+      Platform.On_Space_Key(key_down);
       break;
    }
 
@@ -130,7 +125,7 @@ int AsEngine::On_Timer()
       {
          Game_State = EGame_State::EGS_Play_Level;
          Ball_Set.Set_On_Platform(Platform.Get_Middle_Pos());
-         Platform.Set_State(EPlatform_State::EPS_Glue_Init);
+         //Platform.Set_State(EPlatform_State::EPS_Glue_Init);
       }
       break;
    }
@@ -219,27 +214,36 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
    {
    //case ELetter_Type::ELT_O: // "Cancel"
    //   break;
+
    case ELetter_Type::ELT_I: // "Inversion"
       Ball_Set.Inverse_Ball();
       break;
+
    case ELetter_Type::ELT_C: // "Speed"
       Ball_Set.Reset_Speed();
       break;
+
    //case ELetter_Type::ELT_M: // "Monsters"
    //   break;
+
    case ELetter_Type::ELT_G: // "Life"
       if(Life_Count < AsConfig::Max_Life_Count)
          ++Life_Count; // !!! Display on indicator
       break;
-   //case ELetter_Type::ELT_K: // "Glue"
-   //   break;
+
+   case ELetter_Type::ELT_K: // "Glue"
+      Platform.Set_State(EPlatform_State::EPS_Glue_Init);
+      break;
+
    //case ELetter_Type::ELT_W: // "Extension"
    //   break;
+
    case ELetter_Type::ELT_P: // "Floor"
       AsConfig::Level_Has_Floor = true;
       Border.Redraw_Floor();
       // !!! Display on indicator
       break;
+
    //case ELetter_Type::ELT_L: // "Laser"
    //   break;
 

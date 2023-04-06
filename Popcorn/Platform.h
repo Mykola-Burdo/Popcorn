@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Falling_Letter.h"
+#include "Ball_Set.h"
 
 enum class EPlatform_State
 {
@@ -44,10 +45,12 @@ public:
    virtual void Draw(HDC, RECT &);
    virtual bool Is_Finished();
 
+   void Init(AsBall_Set*);
    EPlatform_State Get_State();
    void Set_State(EPlatform_State);
    void Redraw_Platform(bool update_rect = true);
    void Move(bool, bool);
+   void On_Space_Key(bool);
    bool Hit_By(AFalling_Letter *);
    double Get_Middle_Pos();
 
@@ -73,6 +76,7 @@ private:
    double X_Pos;
    double Speed;
    double Glue_Spot_Height_Ratio;
+   AsBall_Set *Ball_Set;
 
    int Normal_Platform_Image_Width, Normal_Platform_Image_Height;
    int *Normal_Platform_Image; // Platform image pixels on background

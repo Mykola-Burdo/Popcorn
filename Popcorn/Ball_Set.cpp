@@ -72,6 +72,25 @@ void AsBall_Set::Release_From_Platform(double platform_x_pos)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void AsBall_Set::Release_Next_Ball()
+{
+   double ball_x, ball_y;
+   ABall *curr_ball;
+
+   for (int i = 0; i < AsConfig::Max_Balls_Count; ++i)
+   {
+      curr_ball = &Balls[i];
+
+      if (curr_ball->Get_State() == EBall_State::EBS_On_Platform)
+      {
+         curr_ball->Get_Center(ball_x, ball_y);
+         curr_ball->Set_State(EBall_State::EBS_Normal, ball_x, ball_y);
+         break;
+      }
+   }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 void AsBall_Set::Set_On_Platform(double platform_x_pos)
 {
    //for (i = 0; i < 3; ++i)
