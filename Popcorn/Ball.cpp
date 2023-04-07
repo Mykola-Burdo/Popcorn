@@ -53,10 +53,10 @@ int ABall::Hit_Checkers_Count = 0;
 AHit_Checker *ABall::Hit_Checkers[] = {};
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-   : Ball_State(EBall_State::EBS_Disabled), Prev_Ball_State(EBall_State::EBS_Disabled), Center_X_Pos(0.0), Center_Y_Pos(0.0), Ball_Speed(0.0),
-    Ball_Direction(0), Testing_Is_Active(false), Test_Iteration(0), Ball_Rect{}, Prev_Ball_Rect{}
+   : Ball_State(EBall_State::EBS_Disabled), Prev_Ball_State(EBall_State::EBS_Disabled), Release_Timer_Tick(0), Center_X_Pos(0.0),
+   Center_Y_Pos(0.0), Ball_Speed(0.0), Prev_Ball_Speed(0.0), Ball_Direction(0.0), Prev_Ball_Direction(0.0), Testing_Is_Active(false),
+   Test_Iteration(0), Ball_Rect{}, Prev_Ball_Rect{}
 {
-   //Set_State(EBall_State::EBS_Normal, 0);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -87,7 +87,9 @@ void ABall::Finish_Movement()
 
 void ABall::Advance(double max_speed)
 {
+   const int max_hits_count = 8;
    bool got_hit = true;
+   int prev_hits_count = 0;
    double next_x_pos, next_y_pos;
    double next_step;
 
@@ -107,7 +109,17 @@ void ABall::Advance(double max_speed)
       for (int i = 0; i < Hit_Checkers_Count; ++i)
          got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);
 
-      if (!got_hit)
+      if (got_hit)
+      {
+         ++prev_hits_count;
+
+         if(prev_hits_count >= max_hits_count)
+         {
+            Ball_Direction += M_PI / 8.0;
+            prev_hits_count = 0;
+         }
+      }
+      else
       {
          // The ball continues to move if it did not interact with other objects
          Center_X_Pos = next_x_pos;
@@ -116,6 +128,9 @@ void ABall::Advance(double max_speed)
          if (Testing_Is_Active)
             Rest_Test_Distance -= next_step;
       }
+
+      if(Ball_State == EBall_State::EBS_On_Platform)
+         break;
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -283,9 +298,12 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
    case EBall_State::EBS_On_Platform:
       Center_X_Pos = x_pos;
       Center_Y_Pos = y_pos;
+      Prev_Ball_Speed = Ball_Speed;
       Ball_Speed = 0.0;
       //Rest_Distance = 0.0;
-      Ball_Direction = M_PI_4;
+      Prev_Ball_Direction = Ball_Direction;
+      //Ball_Direction = M_PI_4;
+      Release_Timer_Tick = AsConfig::Current_Timer_Tick + On_Platform_Timeout;
       Redraw_Ball();
       break;
 
@@ -400,6 +418,39 @@ void ABall::Set_On_Parachute(int brick_x, int brick_y)
    Center_Y_Pos = (double)(cell_y + Parachute_Size) - ABall::Radius * 2.0;
 
    Redraw_Parachute();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ABall::Forced_Advance(double direction, double speed, double max_speed)
+{// Forced displacement of the ball
+
+   EBall_State prev_state = Ball_State;
+   double prev_direction = Ball_Direction;
+   double prev_speed = Ball_Speed;
+
+   Ball_State = EBall_State::EBS_Normal;
+   Ball_Direction = direction;
+   Ball_Speed = speed;
+
+   Advance(max_speed);
+
+   Ball_State = prev_state;
+   Ball_Direction = prev_direction;
+   Ball_Speed = prev_speed;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ABall::Release()
+{// Continue the interrupted ball movement
+
+   Set_State(EBall_State::EBS_Normal, Center_X_Pos, Center_Y_Pos);
+   Ball_Speed = Prev_Ball_Speed;
+
+   if(Ball_Speed < AsConfig::Normal_Ball_Speed)
+      Ball_Speed = AsConfig::Normal_Ball_Speed;
+
+   Ball_Direction = Prev_Ball_Direction;
+   Release_Timer_Tick = 0;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

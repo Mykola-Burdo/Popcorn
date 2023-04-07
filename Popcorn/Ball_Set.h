@@ -16,7 +16,7 @@ public:
    virtual bool Is_Finished();
 
    void Release_From_Platform(double);
-   void Release_Next_Ball();
+   bool Release_Next_Ball();
    void Set_On_Platform(double);
    bool All_Balls_Are_Lost();
    void Set_For_Test();
@@ -25,6 +25,7 @@ public:
    void Inverse_Ball();
    void Accelerate();
    void Reset_Speed();
+   void On_Platform_Advance(double, double, double);
 
 private:
    ABall Balls[AsConfig::Max_Balls_Count];

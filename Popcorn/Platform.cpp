@@ -2,6 +2,7 @@
 
 //--------------AsPlatform--------------------
 const double AsPlatform::Max_Glue_Spot_Height_Ratio = 1.0;
+const double AsPlatform::Min_Glue_Spot_Height_Ratio = 0.4;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AsPlatform::~AsPlatform()
@@ -115,6 +116,16 @@ void AsPlatform::Advance(double max_speed)
       Speed = 0.0;
       Platform_Moving_State = EPlatform_Moving_State::EPMS_Stopping;
    }
+
+   // Offset glued balls
+   if(Platform_State == EPlatform_State::EPS_Ready || Platform_State == EPlatform_State::EPS_Glue)
+   {
+      if(Platform_Moving_State == EPlatform_Moving_State::EPMS_Moving_Left)
+         Ball_Set->On_Platform_Advance(M_PI, fabs(Speed), max_speed);
+      else
+         if(Platform_Moving_State == EPlatform_Moving_State::EPMS_Moving_Right)
+            Ball_Set->On_Platform_Advance(0.0, fabs(Speed), max_speed);
+   }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -136,13 +147,20 @@ void AsPlatform::Act()
 
    case EPlatform_State::EPS_Glue_Init:
       if(Glue_Spot_Height_Ratio < Max_Glue_Spot_Height_Ratio)
-      {
          Glue_Spot_Height_Ratio += 0.05;
-         Redraw_Platform(false);
-      }
       else
          Platform_State = EPlatform_State::EPS_Glue;
 
+      Redraw_Platform(false);
+      break;
+
+   case EPlatform_State::EPS_Glue_Finalize:
+      if(Glue_Spot_Height_Ratio > Min_Glue_Spot_Height_Ratio)
+         Glue_Spot_Height_Ratio -= 0.05;
+      else
+         Platform_State = EPlatform_State::EPS_Normal;
+
+      Redraw_Platform(false);
       break;
    }
 }
@@ -258,14 +276,21 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       break;
 
    case EPlatform_State::EPS_Glue_Init:
-      Glue_Spot_Height_Ratio = 0.4;
+      if(Platform_State == EPlatform_State::EPS_Glue || Platform_State == EPlatform_State::EPS_Glue_Finalize)
+         return;
+      else
+         Glue_Spot_Height_Ratio = Min_Glue_Spot_Height_Ratio;
       break;
 
-   //case EPlatform_State::EPS_Glue:
-   //   break;
+   case EPlatform_State::EPS_Glue:
+      AsConfig::Throw(); // Such a state is not set via Set_State()
+      break;
 
-   //case EPlatform_State::EPS_Glue_Finalize:
-   //   break;
+   case EPlatform_State::EPS_Glue_Finalize:
+      while(Ball_Set->Release_Next_Ball())
+      {
+      }
+      break;
    }
       
    Platform_State = new_state;

@@ -75,6 +75,10 @@ public:
    bool Is_Moving_Up(); 
    bool Is_Moving_Left();
    void Set_On_Parachute(int, int);
+   void Forced_Advance(double, double, double);
+   void Release();
+
+   int Release_Timer_Tick; // The value of the time counter after which the glued ball must be released
 
    static void Add_Hit_Checker(AHit_Checker *);
 
@@ -90,8 +94,8 @@ private:
 
    double Center_X_Pos, Center_Y_Pos;
    //double Rest_Distance;
-   double Ball_Direction;
-   double Ball_Speed;
+   double Ball_Direction, Prev_Ball_Direction;
+   double Ball_Speed, Prev_Ball_Speed;
 
    bool Testing_Is_Active;
    int Test_Iteration;
@@ -101,6 +105,7 @@ private:
    RECT Parachute_Rect, Prev_Parachute_Rect;
 
    static const int Parachute_Size = 15;
+   static const int On_Platform_Timeout = 10 * AsConfig::FPS; // Time spent on the platform
    static int Hit_Checkers_Count;
    static AHit_Checker *Hit_Checkers[3];
 };

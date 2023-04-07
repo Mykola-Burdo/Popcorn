@@ -200,6 +200,9 @@ void AsEngine::Act()
    Platform.Act();
    Level.Act();
 
+   if(Platform.Get_State() != EPlatform_State::EPS_Ready)
+      Ball_Set.Act();
+
    while(Level.Get_Next_Falling_Letter(index, &falling_letter))
    {
       if(Platform.Hit_By(falling_letter))
@@ -212,8 +215,9 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 {
    switch (falling_letter->Letter_Type)
    {
-   //case ELetter_Type::ELT_O: // "Cancel"
-   //   break;
+   case ELetter_Type::ELT_O: // "Cancel"
+      Platform.Set_State(EPlatform_State::EPS_Glue_Finalize);
+      break; // !!! For now, only glue is canceled!
 
    case ELetter_Type::ELT_I: // "Inversion"
       Ball_Set.Inverse_Ball();
