@@ -31,6 +31,7 @@ class AsConfig
 public:
    static int Rand(int);
    static void Round_Rect(HDC, RECT &, int corner_radius = 2);
+   static void Invalidate_Rect(RECT &);
    static void Throw();
 
    static bool Level_Has_Floor;
@@ -45,6 +46,7 @@ public:
    static const double Start_Ball_Y_Pos;
    static const double Ball_Acceleration;
    static const double Normal_Ball_Speed;
+   static const double Min_Ball_Angle;
 
 	static const int Global_Scale = 3;
    static const int Level_Width = 12; // Level width in cells
@@ -52,7 +54,7 @@ public:
    static const int Cell_Width = 16;
    static const int Cell_Height = 8;
    static const int Brick_Width = 15;
-   static const int Brick_Height = 7; 
+   static const int Brick_Height = 7;
    static const int Level_X_Offset = 8;
    static const int Level_Y_Offset = 6;
    static const int Border_X_Offset = 6;

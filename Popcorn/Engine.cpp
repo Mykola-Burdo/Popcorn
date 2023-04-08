@@ -216,15 +216,17 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
    switch (falling_letter->Letter_Type)
    {
    case ELetter_Type::ELT_O: // "Cancel"
-      Platform.Set_State(EPlatform_State::EPS_Glue_Finalize);
+      Platform.Set_State(EPlatform_State::EPS_Normal);
       break; // !!! For now, only glue is canceled!
 
    case ELetter_Type::ELT_I: // "Inversion"
       Ball_Set.Inverse_Ball();
+      Platform.Set_State(EPlatform_State::EPS_Normal);
       break;
 
    case ELetter_Type::ELT_C: // "Speed"
       Ball_Set.Reset_Speed();
+      Platform.Set_State(EPlatform_State::EPS_Normal);
       break;
 
    //case ELetter_Type::ELT_M: // "Monsters"
@@ -233,10 +235,11 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
    case ELetter_Type::ELT_G: // "Life"
       if(Life_Count < AsConfig::Max_Life_Count)
          ++Life_Count; // !!! Display on indicator
+      Platform.Set_State(EPlatform_State::EPS_Normal);
       break;
 
    case ELetter_Type::ELT_K: // "Glue"
-      Platform.Set_State(EPlatform_State::EPS_Glue_Init);
+      Platform.Set_State(EPlatform_State::EPS_Glue);
       break;
 
    //case ELetter_Type::ELT_W: // "Extension"
@@ -246,12 +249,14 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
       AsConfig::Level_Has_Floor = true;
       Border.Redraw_Floor();
       // !!! Display on indicator
+      Platform.Set_State(EPlatform_State::EPS_Normal);
       break;
 
    //case ELetter_Type::ELT_L: // "Laser"
    //   break;
 
    case ELetter_Type::ELT_T: // "Three"
+      Platform.Set_State(EPlatform_State::EPS_Normal);
       Ball_Set.Triple_Balls();
       break;
 

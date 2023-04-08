@@ -207,13 +207,13 @@ void AsBall_Set::Triple_Balls()
    if (left_candidate != 0)
    {
       *left_candidate = *further_ball;
-      left_candidate->Set_Direction(left_candidate->Get_Direction() + M_PI / 8.0);
+      left_candidate->Set_Direction(left_candidate->Get_Direction() + AsConfig::Min_Ball_Angle);
    }
 
    if (right_candidate != 0)
    {
       *right_candidate = *further_ball;
-      right_candidate->Set_Direction(right_candidate->Get_Direction() - M_PI / 8.0);
+      right_candidate->Set_Direction(right_candidate->Get_Direction() - AsConfig::Min_Ball_Angle);
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------

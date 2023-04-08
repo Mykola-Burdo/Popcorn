@@ -115,7 +115,7 @@ void ABall::Advance(double max_speed)
 
          if(prev_hits_count >= max_hits_count)
          {
-            Ball_Direction += M_PI / 8.0;
+            Ball_Direction += AsConfig::Min_Ball_Angle;
             prev_hits_count = 0;
          }
       }
@@ -361,11 +361,31 @@ void ABall::Set_Direction(double new_direction)
 {
    const double pi_2 = 2.0 * M_PI;
 
+   // Convert angle to range [0 ... pi_2]
    while(new_direction > pi_2)
       new_direction -= pi_2;
 
    while(new_direction < 0)
       new_direction += pi_2;
+
+   // We will not allow to approach the horizontal axis closer than the angle AsConfig::Min_Ball_Angle
+   // Left
+   // Above
+   if(new_direction < AsConfig::Min_Ball_Angle)
+      new_direction = AsConfig::Min_Ball_Angle;
+
+   // Bottom
+   if(new_direction > pi_2 - AsConfig::Min_Ball_Angle)
+      new_direction = pi_2 - AsConfig::Min_Ball_Angle;
+
+   // On right
+   // Above
+   if(new_direction > M_PI - AsConfig::Min_Ball_Angle && new_direction < M_PI)
+      new_direction = M_PI - AsConfig::Min_Ball_Angle;
+
+   // Bottom
+   if(new_direction >= M_PI && new_direction < M_PI + AsConfig::Min_Ball_Angle)
+      new_direction = M_PI + AsConfig::Min_Ball_Angle;
 
    Ball_Direction = new_direction;
 }
@@ -470,15 +490,15 @@ void ABall::Redraw_Ball()
    Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::D_Global_Scale);
    Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::D_Global_Scale);
 
-   InvalidateRect(AsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
-   InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);
+   AsConfig::Invalidate_Rect(Prev_Ball_Rect);
+   AsConfig::Invalidate_Rect(Ball_Rect);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 void ABall::Redraw_Parachute()
 {
-   InvalidateRect(AsConfig::Hwnd, &Prev_Parachute_Rect, FALSE);
-   InvalidateRect(AsConfig::Hwnd, &Parachute_Rect, FALSE);
+   AsConfig::Invalidate_Rect(Prev_Parachute_Rect);
+   AsConfig::Invalidate_Rect(Parachute_Rect);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

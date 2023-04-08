@@ -87,6 +87,7 @@ const double AsConfig::Moving_Step_Size = 1.0 / AsConfig::Global_Scale;
 const double AsConfig::Start_Ball_Y_Pos = 184.0;
 const double AsConfig::Ball_Acceleration = 1.001;
 const double AsConfig::Normal_Ball_Speed = 3.0;
+const double AsConfig::Min_Ball_Angle = M_PI / 8.0;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 int AsConfig::Rand(int range)
@@ -102,6 +103,12 @@ void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_radius)
 
    RoundRect(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1, radius, radius);
 
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsConfig::Invalidate_Rect(RECT &rect)
+{
+   InvalidateRect(AsConfig::Hwnd, &rect, FALSE);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
