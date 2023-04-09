@@ -8,11 +8,19 @@ enum class EPlatform_State
    EPS_Missing,
    EPS_Ready,
    EPS_Normal,
-   EPS_Pre_Meltdown,
    EPS_Meltdown,
    EPS_Roll_In,
    EPS_Expand_Roll_In,
    EPS_Glue,
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+enum class EPlatform_Substate_Meltdown
+{
+   EPSM_Unknown,
+
+   EPSM_Init,
+   EPSM_Active
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -65,6 +73,8 @@ public:
    int Width;
 
 private:
+   void Act_For_Meltdown_State();
+   void Act_For_Glue_State();
    void Draw_Circle_Highlight(HDC, int, int);
    void Draw_Normal_State(HDC, RECT &);
    void Draw_Meltdown_State(HDC, RECT &);
@@ -77,6 +87,7 @@ private:
    void Get_Normal_Platform_Image(HDC);
 
    EPlatform_State Platform_State;
+   EPlatform_Substate_Meltdown Platform_Substate_Meltdown;
    EPlatform_Substate_Glue Platform_Substate_Glue;
    EPlatform_Moving_State Platform_Moving_State;
    bool Left_Key_Down, Right_Key_Down;

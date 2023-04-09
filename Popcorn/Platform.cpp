@@ -15,9 +15,10 @@ AsPlatform::~AsPlatform()
 AsPlatform::AsPlatform()
    : X_Pos(AsConfig::Border_X_Offset), Normal_Platform_Image_Width(0), Normal_Platform_Image_Height(0), Normal_Platform_Image(0), 
    Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), Ball_Set(0),
-   Platform_State(EPlatform_State::EPS_Missing), Platform_Moving_State(EPlatform_Moving_State::EPMS_Stop), 
-   Platform_Substate_Glue(EPlatform_Substate_Glue::EPSG_Unknown), Left_Key_Down(false), Right_Key_Down(false), Platform_Rect{}, 
-   Prev_Platform_Rect{}, Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192)
+   Platform_State(EPlatform_State::EPS_Missing), Platform_Moving_State(EPlatform_Moving_State::EPMS_Stop),
+   Platform_Substate_Meltdown(EPlatform_Substate_Meltdown::EPSM_Unknown), Platform_Substate_Glue(EPlatform_Substate_Glue::EPSG_Unknown), 
+   Left_Key_Down(false), Right_Key_Down(false), Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Color(255, 255, 255), 
+   Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192)
 {
    X_Pos = (AsConfig::Max_X_Pos - Width) / 2;
 }
@@ -141,35 +142,16 @@ void AsPlatform::Act()
    switch (Platform_State)
    {
    case EPlatform_State::EPS_Meltdown:
+      Act_For_Meltdown_State();
+      break;
+
    case EPlatform_State::EPS_Roll_In:
    case EPlatform_State::EPS_Expand_Roll_In:
       Redraw_Platform();
       break;
 
    case EPlatform_State::EPS_Glue:
-      switch (Platform_Substate_Glue)
-      {
-      case EPlatform_Substate_Glue::EPSG_Init:
-         if(Glue_Spot_Height_Ratio < Max_Glue_Spot_Height_Ratio)
-            Glue_Spot_Height_Ratio += Glue_Spot_Height_Ratio_Step;
-         else
-            Platform_Substate_Glue = EPlatform_Substate_Glue::EPSG_Active;
-
-         Redraw_Platform(false);
-         break;
-
-      case EPlatform_Substate_Glue::EPSG_Finalize:
-         if(Glue_Spot_Height_Ratio > Min_Glue_Spot_Height_Ratio)
-            Glue_Spot_Height_Ratio -= Glue_Spot_Height_Ratio_Step;
-         else
-         {
-            Platform_State = EPlatform_State::EPS_Normal;
-            Platform_Substate_Glue = EPlatform_Substate_Glue::EPSG_Unknown;
-         }
-
-         Redraw_Platform(false);
-         break;
-      }
+      Act_For_Glue_State();
       break;
    }
 }
@@ -186,7 +168,6 @@ void AsPlatform::Clear(HDC hdc, RECT &paint_area)
    {
    case EPlatform_State::EPS_Ready:
    case EPlatform_State::EPS_Normal:
-   case EPlatform_State::EPS_Pre_Meltdown:
    case EPlatform_State::EPS_Roll_In:
    case EPlatform_State::EPS_Expand_Roll_In:
    case EPlatform_State::EPS_Glue:
@@ -212,13 +193,14 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
       Draw_Normal_State(hdc, paint_area);
       break;
 
-   case EPlatform_State::EPS_Pre_Meltdown:
-      Draw_Normal_State(hdc, paint_area);
-      Set_State(EPlatform_State::EPS_Meltdown);
-      break;
+   //case EPlatform_State::EPS_Pre_Meltdown:
+   //   Draw_Normal_State(hdc, paint_area);
+   //   Set_State(EPlatform_State::EPS_Meltdown);
+   //   break;
 
    case EPlatform_State::EPS_Meltdown:
-      Draw_Meltdown_State(hdc, paint_area);
+      if(Platform_Substate_Meltdown == EPlatform_Substate_Meltdown::EPSM_Active)
+         Draw_Meltdown_State(hdc, paint_area);
       break;
 
    case EPlatform_State::EPS_Roll_In:
@@ -276,11 +258,14 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       }
       break;
 
-   case EPlatform_State::EPS_Pre_Meltdown:
-      Speed = 0.0;
-      break;
+   //case EPlatform_State::EPS_Pre_Meltdown:
+   //   Speed = 0.0;
+   //   break;
 
    case EPlatform_State::EPS_Meltdown:
+      Speed = 0.0;
+      Platform_Substate_Meltdown = EPlatform_Substate_Meltdown::EPSM_Init;
+
       len = sizeof(Meltdown_Platform_Y_Pos) / sizeof(Meltdown_Platform_Y_Pos[0]);
 
       for (int i = 0; i < len; ++i)
@@ -404,6 +389,50 @@ bool AsPlatform::Hit_By(AFalling_Letter *falling_letter)
 double AsPlatform::Get_Middle_Pos()
 {
    return X_Pos + (double)Width / 2.0;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Act_For_Meltdown_State()
+{
+   switch(Platform_Substate_Meltdown)
+   {
+   case EPlatform_Substate_Meltdown::EPSM_Init:
+      Platform_Substate_Meltdown = EPlatform_Substate_Meltdown::EPSM_Active;
+      break;
+
+   case EPlatform_Substate_Meltdown::EPSM_Active:
+      Redraw_Platform();
+      break;
+   }
+      
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Act_For_Glue_State()
+{
+   switch (Platform_Substate_Glue)
+      {
+      case EPlatform_Substate_Glue::EPSG_Init:
+         if(Glue_Spot_Height_Ratio < Max_Glue_Spot_Height_Ratio)
+            Glue_Spot_Height_Ratio += Glue_Spot_Height_Ratio_Step;
+         else
+            Platform_Substate_Glue = EPlatform_Substate_Glue::EPSG_Active;
+
+         Redraw_Platform(false);
+         break;
+
+      case EPlatform_Substate_Glue::EPSG_Finalize:
+         if(Glue_Spot_Height_Ratio > Min_Glue_Spot_Height_Ratio)
+            Glue_Spot_Height_Ratio -= Glue_Spot_Height_Ratio_Step;
+         else
+         {
+            Platform_State = EPlatform_State::EPS_Normal;
+            Platform_Substate_Glue = EPlatform_Substate_Glue::EPSG_Unknown;
+         }
+
+         Redraw_Platform(false);
+         break;
+      }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
