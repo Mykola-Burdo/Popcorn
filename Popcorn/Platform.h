@@ -3,12 +3,12 @@
 #include "Falling_Letter.h"
 #include "Ball_Set.h"
 
-enum class EPlatform_State
+enum class EPlatform_State : unsigned char
 {
-   EPS_Regular,
-   EPS_Meltdown,
-   EPS_Rolling,
-   EPS_Glue,
+   Regular,
+   Meltdown,
+   Rolling,
+   Glue,
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -22,41 +22,60 @@ enum class EPlatform_Substate_Regular : unsigned char
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-enum class EPlatform_Substate_Meltdown
+enum class EPlatform_Substate_Meltdown : unsigned char
 {
-   EPSM_Unknown,
+   Unknown,
 
-   EPSM_Init,
-   EPSM_Active
-
+   Init,
+   Active
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-enum class EPlatform_Substate_Rolling
+enum class EPlatform_Substate_Rolling : unsigned char
 {
-   EPSR_Unknown,
+   Unknown,
 
-   EPSR_Roll_In,
-   EPSR_Expand_Roll_In,
+   Roll_In,
+   Expand_Roll_In,
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-enum class EPlatform_Substate_Glue
+enum class EPlatform_Substate_Glue : unsigned char
 {
-   EPSG_Unknown,
+   Unknown,
 
-   EPSG_Init,
-   EPSG_Active,
-   EPSG_Finalize
+   Init,
+   Active,
+   Finalize
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-enum class EPlatform_Moving_State
+enum class EPlatform_Moving_State : unsigned char
 {
-   EPMS_Stopping,
-   EPMS_Stop,
-   EPMS_Moving_Left,
-   EPMS_Moving_Right
+   Stopping,
+   Stop,
+   Moving_Left,
+   Moving_Right
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AsPlatform_State
+{
+public:
+   AsPlatform_State();
+
+   operator EPlatform_State() const;
+   void operator = (EPlatform_State new_state);
+
+   EPlatform_Substate_Regular Regular;
+   EPlatform_Substate_Meltdown Meltdown;
+   EPlatform_Substate_Rolling Rolling;
+   EPlatform_Substate_Glue Glue;
+
+   EPlatform_Moving_State Moving;
+
+private:
+      EPlatform_State Current_State;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -106,12 +125,7 @@ private:
    bool Get_Platform_Image_Stroke_Color(int, int, const AColor **, int &);
    void Get_Normal_Platform_Image(HDC);
 
-   EPlatform_State Platform_State;
-   EPlatform_Substate_Regular Platform_Substate_Regular;
-   EPlatform_Substate_Meltdown Platform_Substate_Meltdown;
-   EPlatform_Substate_Rolling Platform_Substate_Rolling;
-   EPlatform_Substate_Glue Platform_Substate_Glue;
-   EPlatform_Moving_State Platform_Moving_State;
+   AsPlatform_State Platform_State;
    bool Left_Key_Down, Right_Key_Down;
    int Inner_Width;
    int Rolling_Step;
