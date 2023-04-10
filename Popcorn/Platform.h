@@ -5,13 +5,20 @@
 
 enum class EPlatform_State
 {
-   EPS_Missing,
-   EPS_Ready,
-   EPS_Normal,
+   EPS_Regular,
    EPS_Meltdown,
-   EPS_Roll_In,
-   EPS_Expand_Roll_In,
+   EPS_Rolling,
    EPS_Glue,
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+enum class EPlatform_Substate_Regular : unsigned char
+{
+   Unknown,
+
+   Missing,
+   Ready,
+   Normal
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -21,6 +28,16 @@ enum class EPlatform_Substate_Meltdown
 
    EPSM_Init,
    EPSM_Active
+
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+enum class EPlatform_Substate_Rolling
+{
+   EPSR_Unknown,
+
+   EPSR_Roll_In,
+   EPSR_Expand_Roll_In,
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,6 +81,8 @@ public:
    void Init(AsBall_Set*);
    EPlatform_State Get_State();
    void Set_State(EPlatform_State);
+   void Set_State(EPlatform_Substate_Regular);
+   bool Has_State(EPlatform_Substate_Regular);
    void Redraw_Platform(bool update_rect = true);
    void Move(bool, bool);
    void On_Space_Key(bool);
@@ -74,12 +93,13 @@ public:
 
 private:
    void Act_For_Meltdown_State();
+   void Act_For_Rolling_State();
    void Act_For_Glue_State();
    void Draw_Circle_Highlight(HDC, int, int);
    void Draw_Normal_State(HDC, RECT &);
    void Draw_Meltdown_State(HDC, RECT &);
+   void Draw_Rolling_State(HDC, RECT &);
    void Draw_Roll_In_State(HDC, RECT &);
-   void Draw_Expanding_Roll_In_State(HDC, RECT &);
    void Draw_Glue_State(HDC, RECT &);
    void Draw_Glue_Spot(HDC, int, int, int);
    bool Reflect_On_Circle(double, double, double, ABall *);
@@ -87,7 +107,9 @@ private:
    void Get_Normal_Platform_Image(HDC);
 
    EPlatform_State Platform_State;
+   EPlatform_Substate_Regular Platform_Substate_Regular;
    EPlatform_Substate_Meltdown Platform_Substate_Meltdown;
+   EPlatform_Substate_Rolling Platform_Substate_Rolling;
    EPlatform_Substate_Glue Platform_Substate_Glue;
    EPlatform_Moving_State Platform_Moving_State;
    bool Left_Key_Down, Right_Key_Down;

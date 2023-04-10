@@ -113,15 +113,15 @@ int AsEngine::On_Timer()
 
 
    case EGame_State::EGS_Lost_Ball:
-      if(Platform.Get_State() == EPlatform_State::EPS_Missing)
+      if(Platform.Has_State(EPlatform_Substate_Regular::Missing))
       {
          Game_State = EGame_State::EGS_Restart_Level;
-         Platform.Set_State(EPlatform_State::EPS_Roll_In);
+         Platform.Set_State(EPlatform_State::EPS_Rolling);
       }
       break;
 
    case EGame_State::EGS_Restart_Level:
-      if (Platform.Get_State() == EPlatform_State::EPS_Ready)
+      if (Platform.Has_State(EPlatform_Substate_Regular::Ready))
       {
          Game_State = EGame_State::EGS_Play_Level;
          Ball_Set.Set_On_Platform(Platform.Get_Middle_Pos());
@@ -200,7 +200,7 @@ void AsEngine::Act()
    Platform.Act();
    Level.Act();
 
-   if(Platform.Get_State() != EPlatform_State::EPS_Ready)
+   if(!Platform.Has_State(EPlatform_Substate_Regular::Ready))
       Ball_Set.Act();
 
    while(Level.Get_Next_Falling_Letter(index, &falling_letter))
@@ -216,17 +216,17 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
    switch (falling_letter->Letter_Type)
    {
    case ELetter_Type::ELT_O: // "Cancel"
-      Platform.Set_State(EPlatform_State::EPS_Normal);
+      Platform.Set_State(EPlatform_Substate_Regular::Normal);
       break; // !!! For now, only glue is canceled!
 
    case ELetter_Type::ELT_I: // "Inversion"
       Ball_Set.Inverse_Ball();
-      Platform.Set_State(EPlatform_State::EPS_Normal);
+      Platform.Set_State(EPlatform_Substate_Regular::Normal);
       break;
 
    case ELetter_Type::ELT_C: // "Speed"
       Ball_Set.Reset_Speed();
-      Platform.Set_State(EPlatform_State::EPS_Normal);
+      Platform.Set_State(EPlatform_Substate_Regular::Normal);
       break;
 
    //case ELetter_Type::ELT_M: // "Monsters"
@@ -235,7 +235,7 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
    case ELetter_Type::ELT_G: // "Life"
       if(Life_Count < AsConfig::Max_Life_Count)
          ++Life_Count; // !!! Display on indicator
-      Platform.Set_State(EPlatform_State::EPS_Normal);
+      Platform.Set_State(EPlatform_Substate_Regular::Normal);
       break;
 
    case ELetter_Type::ELT_K: // "Glue"
@@ -249,14 +249,14 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
       AsConfig::Level_Has_Floor = true;
       Border.Redraw_Floor();
       // !!! Display on indicator
-      Platform.Set_State(EPlatform_State::EPS_Normal);
+      Platform.Set_State(EPlatform_Substate_Regular::Normal);
       break;
 
    //case ELetter_Type::ELT_L: // "Laser"
    //   break;
 
    case ELetter_Type::ELT_T: // "Three"
-      Platform.Set_State(EPlatform_State::EPS_Normal);
+      Platform.Set_State(EPlatform_Substate_Regular::Normal);
       Ball_Set.Triple_Balls();
       break;
 
