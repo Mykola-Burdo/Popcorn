@@ -3,7 +3,8 @@
 //--------------AsPlatform_State--------------------
 AsPlatform_State::AsPlatform_State()
    : Current_State(EPlatform_State::Regular), Regular(EPlatform_Substate_Regular::Missing), Meltdown(EPlatform_Substate_Meltdown::Unknown), 
-   Rolling(EPlatform_Substate_Rolling::Unknown), Glue(EPlatform_Substate_Glue::Unknown), Moving(EPlatform_Moving_State::Stop)
+   Rolling(EPlatform_Substate_Rolling::Unknown), Glue(EPlatform_Substate_Glue::Unknown), Expanding(EPlatform_Substate_Expanding::Unknown),
+   Moving(EPlatform_Moving_State::Stop)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,6 +28,9 @@ void AsPlatform_State::operator = (EPlatform_State new_state)
 const double AsPlatform::Max_Glue_Spot_Height_Ratio = 1.0;
 const double AsPlatform::Min_Glue_Spot_Height_Ratio = 0.4;
 const double AsPlatform::Glue_Spot_Height_Ratio_Step = 0.05;
+const double AsPlatform::Max_Expanding_Platform_Width = 40.0;
+const double AsPlatform::Min_Expanding_Platform_Width = (double)Normal_Width;
+const double AsPlatform::Expanding_Platform_Width_Step = 1.0;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AsPlatform::~AsPlatform()
@@ -37,9 +41,10 @@ AsPlatform::~AsPlatform()
 
 AsPlatform::AsPlatform()
    : X_Pos(AsConfig::Border_X_Offset), Normal_Platform_Image_Width(0), Normal_Platform_Image_Height(0), Normal_Platform_Image(0), 
-   Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), Ball_Set(0),
-   Left_Key_Down(false), Right_Key_Down(false), Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Color(255, 255, 255),
-   Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192)
+   Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), 
+   Expanding_Platform_Width(0.0), Ball_Set(0),Left_Key_Down(false), Right_Key_Down(false), Platform_Rect{}, Prev_Platform_Rect{}, 
+   Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192), 
+   Truss_Color(Platform_Inner_Color, AsConfig::Global_Scale)
 {
    X_Pos = (AsConfig::Max_X_Pos - Width) / 2;
 }
@@ -230,6 +235,10 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
    case EPlatform_State::Glue:
       Draw_Glue_State(hdc, paint_area);
       break;
+
+   case EPlatform_State::Expanding:
+      Draw_Expanding_State(hdc, paint_area);
+      break;
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,6 +298,16 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       {
          Platform_State.Glue = EPlatform_Substate_Glue::Init;
          Glue_Spot_Height_Ratio = Min_Glue_Spot_Height_Ratio;
+      }
+      break;
+
+   case EPlatform_State::Expanding:
+      if(Platform_State.Expanding == EPlatform_Substate_Expanding::Finalize)
+         return;
+      else
+      {
+         Platform_State.Expanding = EPlatform_Substate_Expanding::Init;
+         Expanding_Platform_Width = Max_Expanding_Platform_Width;
       }
       break;
    }
@@ -731,6 +750,143 @@ void AsPlatform::Draw_Glue_Spot(HDC hdc, int x_offset, int width, int height)
    spot_rect.bottom = platform_top + spot_height - AsConfig::Global_Scale;
 
    Chord(hdc, spot_rect.left, spot_rect.top, spot_rect.right - 1, spot_rect.bottom - 1, spot_rect.left, platform_top - 1, spot_rect.right - 1, platform_top - 1);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Draw_Expanding_State(HDC hdc, RECT &paint_area)
+{// Drawing an expanding platform
+
+   const int scale = AsConfig::Global_Scale;
+   const double d_scale = AsConfig::D_Global_Scale;
+   double x = X_Pos;
+   int y = AsConfig::Platform_Y_Pos;
+   RECT inner_rect;
+
+   inner_rect.left = (int)((x + (Expanding_Platform_Width - (double)Expanding_Platform_Inner_Width) / 2.0) * d_scale);
+   inner_rect.top = (y + 1) * scale;
+   inner_rect.right = inner_rect.left + Expanding_Platform_Inner_Width * scale;
+   inner_rect.bottom = (y + 1 + 5) * scale;
+
+   // Left-hand side
+   // Ball
+   Draw_Expanding_Platform_Ball(hdc, true);
+
+   // Trusses
+   Draw_Expanding_Truss(hdc, inner_rect, true);
+
+   // Right side
+   // Ball
+   Draw_Expanding_Platform_Ball(hdc, false);
+
+   // Trusses
+   Draw_Expanding_Truss(hdc, inner_rect, false);
+
+   // Right Ball
+   /*rect.left = (int)((x + Expanding_Platform_Width - (double)Circle_Size) * d_scale);
+   rect.top = y * scale;
+   rect.right =  rect.left + Circle_Size * scale;
+   rect.bottom = (y + Circle_Size) * scale;
+   Platform_Circle_Color.Select(hdc);
+   Ellipse(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1);*/
+
+   // Draw the middle part
+   Platform_Inner_Color.Select(hdc);
+
+   Rectangle(hdc, inner_rect.left, inner_rect.top, inner_rect.right - 1, inner_rect.bottom - 1);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Draw_Expanding_Platform_Ball(HDC hdc, bool is_left)
+{// Draw the side ball of the expanding platform
+
+   const int scale = AsConfig::Global_Scale;
+   const double d_scale = AsConfig::D_Global_Scale;
+   double x = X_Pos;
+   int y = AsConfig::Platform_Y_Pos;
+   int arc_mid_x;
+   int arc_start_y, arc_end_y, arc_right_offset;
+   RECT rect, arc_rect;
+
+   // Ball
+   if(is_left)
+      rect.left = (int)(x * d_scale);
+   else
+      rect.left = (int)((x + Expanding_Platform_Width - (double)Circle_Size) * d_scale);
+
+   rect.top = y * scale;
+   rect.right = rect.left + Circle_Size * scale;
+   rect.bottom = (y + Circle_Size) * scale;
+
+   Platform_Circle_Color.Select(hdc);
+   Ellipse(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1);
+
+   // Truss adapter
+   if(is_left)
+      Rectangle(hdc, rect.left + 4 * scale, rect.top, rect.right - scale + 1, rect.bottom - 1);
+   else
+      Rectangle(hdc, rect.left + 1, rect.top, rect.left + 3 * scale, rect.bottom - 1);
+
+   // Draw a highlight
+   Draw_Circle_Highlight(hdc, (int)(x * d_scale), y * scale);
+
+   // Arc truss on the ball
+   arc_rect.left = rect.left + 4 * scale + 2;
+   arc_rect.top = rect.top + scale + 1;
+   arc_rect.right = rect.left + (4 + 3) * scale + 2;
+   arc_rect.bottom = rect.bottom - scale - 1;
+
+   arc_mid_x = arc_rect.left + (arc_rect.right - arc_rect.left) / 2;
+
+   if(is_left)
+   {
+      arc_start_y = arc_rect.top;
+      arc_end_y = arc_rect.bottom;
+   }
+   else
+   {
+      arc_start_y = arc_rect.bottom;
+      arc_end_y = arc_rect.top;
+
+      arc_right_offset = (Circle_Size - 2) * scale + 1;
+
+      arc_rect.left -= arc_right_offset;
+      arc_rect.right -= arc_right_offset;
+      arc_mid_x -= arc_right_offset;
+   }
+
+   // A hole in the ball under the arc
+   AsConfig::BG_Color.Select(hdc);
+   Ellipse(hdc, arc_rect.left, arc_rect.top, arc_rect.right - 1, arc_rect.bottom - 1);
+
+   // The arc itself
+   Truss_Color.Select(hdc);
+   Arc(hdc, arc_rect.left, arc_rect.top, arc_rect.right - 1, arc_rect.bottom - 1, arc_mid_x, arc_start_y, arc_mid_x, arc_end_y);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool is_left)
+{// Draw trusses of an expanding platform
+
+   const int scale = AsConfig::Global_Scale;
+   int truss_x;
+   int truss_top_y, truss_low_y;
+
+   truss_x = inner_rect.left + 1;
+
+   if(!is_left)
+      truss_x += (Expanding_Platform_Inner_Width + 8 - 1) * scale + 1;
+
+   truss_top_y = inner_rect.top + 1;
+   truss_low_y = inner_rect.bottom - scale + 1;
+
+   Truss_Color.Select(hdc);
+   MoveToEx(hdc, truss_x, truss_top_y, 0);
+   LineTo(hdc, truss_x - 4 * scale - 1, truss_low_y);
+   LineTo(hdc, truss_x - 8 * scale, truss_top_y);
+
+   MoveToEx(hdc, truss_x, truss_low_y, 0);
+   LineTo(hdc, truss_x - 4 * scale - 1, truss_top_y);
+   LineTo(hdc, truss_x - 8 * scale, truss_low_y);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
