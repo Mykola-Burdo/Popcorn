@@ -37,7 +37,7 @@ void AsEngine::Init(HWND hwnd)
    Level.Set_Current_Level(AsLevel::Level_01);
 
    //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
-   Platform.Set_State(EPlatform_State::Expanding);
+   //Platform.Set_State(EPlatform_State::Expanding);
    
    Platform.Redraw_Platform();
 
@@ -242,8 +242,9 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
       Platform.Set_State(EPlatform_State::Glue);
       break;
 
-   //case ELetter_Type::ELT_W: // "Extension"
-   //   break;
+   case ELetter_Type::ELT_W: // "Extension"
+      Platform.Set_State(EPlatform_State::Expanding);
+      break;
 
    case ELetter_Type::ELT_P: // "Floor"
       AsConfig::Level_Has_Floor = true;

@@ -179,6 +179,10 @@ void AsPlatform::Act()
    case EPlatform_State::Glue:
       Act_For_Glue_State();
       break;
+
+   case EPlatform_State::Expanding:
+      Act_For_Expanding_State();
+      break;
    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -201,6 +205,7 @@ void AsPlatform::Clear(HDC hdc, RECT &paint_area)
 
    case EPlatform_State::Rolling:
    case EPlatform_State::Glue:
+      case EPlatform_State::Expanding:
       // Cleaning up the background
       AsConfig::BG_Color.Select(hdc);
       Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
@@ -307,7 +312,7 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       else
       {
          Platform_State.Expanding = EPlatform_Substate_Expanding::Init;
-         Expanding_Platform_Width = Max_Expanding_Platform_Width;
+         Expanding_Platform_Width = Min_Expanding_Platform_Width;
       }
       break;
    }
@@ -353,20 +358,22 @@ bool AsPlatform::Has_State(EPlatform_Substate_Regular regular_state)
 
 void AsPlatform::Redraw_Platform(bool update_rect)
 {
-   int platform_width;
+   double platform_width;
 
    if(update_rect)
    {
       Prev_Platform_Rect = Platform_Rect;
 
       if (Platform_State == EPlatform_State::Rolling && Platform_State.Rolling == EPlatform_Substate_Rolling::Roll_In)
-         platform_width = Circle_Size;
+         platform_width = (double)Circle_Size;
+      else if (Platform_State == EPlatform_State::Expanding)
+         platform_width = Expanding_Platform_Width;
       else
-         platform_width = Width;
+         platform_width = (double)Width;
 
       Platform_Rect.left = (int)(X_Pos * AsConfig::D_Global_Scale);
       Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
-      Platform_Rect.right = Platform_Rect.left + platform_width * AsConfig::Global_Scale;
+      Platform_Rect.right = (int)((X_Pos + platform_width) * AsConfig::D_Global_Scale);
       Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
 
 
@@ -514,6 +521,9 @@ void AsPlatform::Act_For_Glue_State()
          Redraw_Platform(false);
          break;
 
+      case EPlatform_Substate_Glue::Active:
+         break;
+
       case EPlatform_Substate_Glue::Finalize:
          if(Glue_Spot_Height_Ratio > Min_Glue_Spot_Height_Ratio)
             Glue_Spot_Height_Ratio -= Glue_Spot_Height_Ratio_Step;
@@ -523,9 +533,52 @@ void AsPlatform::Act_For_Glue_State()
             Platform_State.Glue = EPlatform_Substate_Glue::Unknown;
          }
 
-         Redraw_Platform(false);
+         Redraw_Platform();
          break;
+
+      default:
+         AsConfig::Throw();
       }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Act_For_Expanding_State()
+{
+   switch (Platform_State.Expanding)
+   {
+   case EPlatform_Substate_Expanding::Init:
+      if(Expanding_Platform_Width < Max_Expanding_Platform_Width)
+      {
+         Expanding_Platform_Width += Expanding_Platform_Width_Step;
+         X_Pos -= Expanding_Platform_Width_Step / 2.0;
+      }
+      else
+         Platform_State.Expanding = EPlatform_Substate_Expanding::Active;
+
+      Redraw_Platform();
+      break;
+
+   case EPlatform_Substate_Expanding::Active:
+      break;
+
+   case EPlatform_Substate_Expanding::Finalize:
+      if(Expanding_Platform_Width > Min_Expanding_Platform_Width)
+      {
+         Expanding_Platform_Width -= Expanding_Platform_Width_Step;
+         X_Pos += Expanding_Platform_Width_Step / 2.0;
+      }
+      else
+      {
+         Set_State(EPlatform_Substate_Regular::Normal);
+         Platform_State.Expanding = EPlatform_Substate_Expanding::Unknown;
+      }
+
+      Redraw_Platform(false);
+      break;
+
+   default:
+      AsConfig::Throw();
+   }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -870,11 +923,21 @@ void AsPlatform::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool is_left)
    const int scale = AsConfig::Global_Scale;
    int truss_x;
    int truss_top_y, truss_low_y;
+   int truss_x_offset;
+   double extansion_ratio; // [1.0 ... 0.0]
+
+   extansion_ratio = (Max_Expanding_Platform_Width - Expanding_Platform_Width) / (Max_Expanding_Platform_Width - Min_Expanding_Platform_Width);
+   truss_x_offset = (int)(6.0 * extansion_ratio * AsConfig::D_Global_Scale);
 
    truss_x = inner_rect.left + 1;
 
-   if(!is_left)
+    if(is_left)
+       truss_x += truss_x_offset;
+    else
+    {
       truss_x += (Expanding_Platform_Inner_Width + 8 - 1) * scale + 1;
+      truss_x -= truss_x_offset;
+    }
 
    truss_top_y = inner_rect.top + 1;
    truss_low_y = inner_rect.bottom - scale + 1;
