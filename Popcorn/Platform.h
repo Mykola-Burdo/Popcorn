@@ -5,6 +5,8 @@
 
 enum class EPlatform_State : unsigned char
 {
+   Unknown,
+
    Regular,
    Meltdown,
    Rolling,
@@ -78,6 +80,9 @@ public:
    operator EPlatform_State() const;
    void operator = (EPlatform_State new_state);
 
+   void Set_Next_State(EPlatform_State);
+   EPlatform_State Get_Next_State();
+
    EPlatform_Substate_Regular Regular;
    EPlatform_Substate_Meltdown Meltdown;
    EPlatform_Substate_Rolling Rolling;
@@ -88,6 +93,7 @@ public:
 
 private:
       EPlatform_State Current_State;
+      EPlatform_State Next_State; // We enter this state from AsPlatform::Set_State(EPlatform_Substate_Regular new_regular_state)
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -114,13 +120,11 @@ public:
    void Set_State(EPlatform_State);
    void Set_State(EPlatform_Substate_Regular);
    bool Has_State(EPlatform_Substate_Regular);
-   void Redraw_Platform(bool update_rect = true);
+   void Redraw_Platform();
    void Move(bool, bool);
    void On_Space_Key(bool);
    bool Hit_By(AFalling_Letter *);
    double Get_Middle_Pos();
-
-   int Width;
 
 private:
    void Act_For_Meltdown_State();
@@ -140,11 +144,15 @@ private:
    bool Reflect_On_Circle(double, double, double, ABall *);
    bool Get_Platform_Image_Stroke_Color(int, int, const AColor **, int &);
    void Get_Normal_Platform_Image(HDC);
+   double Get_Current_Width();
+   bool Correct_Platform_Pos();
+   void Set_Next_Or_Regular_State(EPlatform_Substate_Regular);
 
    AsPlatform_State Platform_State;
    bool Left_Key_Down, Right_Key_Down;
    int Inner_Width;
    int Rolling_Step;
+   int Last_Redraw_timer_Tick;
    double X_Pos;
    double Speed;
    double Glue_Spot_Height_Ratio;

@@ -2,7 +2,7 @@
 
 //--------------AsPlatform_State--------------------
 AsPlatform_State::AsPlatform_State()
-   : Current_State(EPlatform_State::Regular), Regular(EPlatform_Substate_Regular::Missing), Meltdown(EPlatform_Substate_Meltdown::Unknown), 
+   : Current_State(EPlatform_State::Regular), Next_State(EPlatform_State::Unknown), Regular(EPlatform_Substate_Regular::Missing), Meltdown(EPlatform_Substate_Meltdown::Unknown), 
    Rolling(EPlatform_Substate_Rolling::Unknown), Glue(EPlatform_Substate_Glue::Unknown), Expanding(EPlatform_Substate_Expanding::Unknown),
    Moving(EPlatform_Moving_State::Stop)
 {
@@ -21,7 +21,45 @@ void AsPlatform_State::operator = (EPlatform_State new_state)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void AsPlatform_State::Set_Next_State(EPlatform_State next_state)
+{
+   if(next_state == Current_State)
+      return;
 
+   switch (Current_State)
+   {
+   case EPlatform_State::Regular:
+      AsConfig::Throw(); // Ordinary state "self" does not end, switching to another state must be explicit
+      break;
+
+   case EPlatform_State::Meltdown:
+      return; // We ignore any next state after Meltdown, since after it the game process must be restarted
+
+   case EPlatform_State::Rolling:
+      AsConfig::Throw(); // The Rolling state "by itself" should switch to the following
+      break;
+
+   case EPlatform_State::Glue:
+      Glue = EPlatform_Substate_Glue::Finalize;
+      break;
+
+   case EPlatform_State::Expanding:
+      Expanding = EPlatform_Substate_Expanding::Finalize;
+      break;
+
+   default:
+      AsConfig::Throw();
+   }
+
+   Next_State = next_state;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+EPlatform_State AsPlatform_State::Get_Next_State()
+{
+   return Next_State;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 //--------------AsPlatform--------------------
@@ -41,12 +79,12 @@ AsPlatform::~AsPlatform()
 
 AsPlatform::AsPlatform()
    : X_Pos(AsConfig::Border_X_Offset), Normal_Platform_Image_Width(0), Normal_Platform_Image_Height(0), Normal_Platform_Image(0), 
-   Width(Normal_Width), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), 
+   Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Last_Redraw_timer_Tick(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), 
    Expanding_Platform_Width(0.0), Ball_Set(0),Left_Key_Down(false), Right_Key_Down(false), Platform_Rect{}, Prev_Platform_Rect{}, 
    Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0), Platform_Inner_Color(0, 128, 192), 
    Truss_Color(Platform_Inner_Color, AsConfig::Global_Scale)
 {
-   X_Pos = (AsConfig::Max_X_Pos - Width) / 2;
+   X_Pos = (AsConfig::Max_X_Pos - Normal_Width) / 2;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -65,13 +103,13 @@ bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
    inner_top_y = (double)(AsConfig::Platform_Y_Pos + 1);
    inner_low_y = (double)(AsConfig::Platform_Y_Pos + Height - 1);
    inner_left_x = (double)(X_Pos + Circle_Size - 1);
-   inner_right_x = (double)(X_Pos + Width - (Circle_Size - 1));
+   inner_right_x = (double)(X_Pos + Get_Current_Width() - (Circle_Size - 1));
 
    // Checking the reflection from the side balls
    if(Reflect_On_Circle(next_x_pos, next_y_pos, 0.0, ball))
       goto _on_hit; // From left
 
-   if (Reflect_On_Circle(next_x_pos, next_y_pos, Width - Circle_Size, ball))
+   if (Reflect_On_Circle(next_x_pos, next_y_pos, Get_Current_Width() - Circle_Size, ball))
       goto _on_hit; // From the right
 
    // Checking the reflection from the central part of the platform
@@ -121,26 +159,17 @@ void AsPlatform::Finish_Movement()
 
 void AsPlatform::Advance(double max_speed)
 {
-   double max_platform_x, next_step;
+   double next_step;
 
    if(Platform_State.Moving == EPlatform_Moving_State::Stopping || Platform_State.Moving == EPlatform_Moving_State::Stop)
       return;
 
-   max_platform_x = AsConfig::Max_X_Pos - Width + 1;
    next_step = Speed / max_speed * AsConfig::Moving_Step_Size;
 
    X_Pos += next_step;
 
-   if (X_Pos <= AsConfig::Border_X_Offset)
+   if(Correct_Platform_Pos())
    {
-      X_Pos = AsConfig::Border_X_Offset;
-      Speed = 0.0;
-      Platform_State.Moving = EPlatform_Moving_State::Stopping;
-   }
-
-   if (X_Pos >= max_platform_x)
-   {
-      X_Pos = max_platform_x;
       Speed = 0.0;
       Platform_State.Moving = EPlatform_Moving_State::Stopping;
    }
@@ -280,6 +309,12 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       break;
 
    case EPlatform_State::Meltdown:
+      if(Platform_State != EPlatform_State::Regular)
+      {
+         Platform_State.Set_Next_State(new_state);
+         return;
+      }
+
       Speed = 0.0;
       Platform_State.Meltdown = EPlatform_Substate_Meltdown::Init;
 
@@ -297,6 +332,12 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       break;
 
    case EPlatform_State::Glue:
+      if(Platform_State != EPlatform_State::Regular)
+      {
+         Platform_State.Set_Next_State(new_state);
+         return;
+      }
+
       if(Platform_State.Glue == EPlatform_Substate_Glue::Finalize)
          return;
       else
@@ -307,6 +348,12 @@ void AsPlatform::Set_State(EPlatform_State new_state)
       break;
 
    case EPlatform_State::Expanding:
+      if(Platform_State != EPlatform_State::Regular)
+      {
+         Platform_State.Set_Next_State(new_state);
+         return;
+      }
+
       if(Platform_State.Expanding == EPlatform_Substate_Expanding::Finalize)
          return;
       else
@@ -323,22 +370,33 @@ void AsPlatform::Set_State(EPlatform_State new_state)
 
 void AsPlatform::Set_State(EPlatform_Substate_Regular new_regular_state)
 {
+   EPlatform_State next_state;
+
    if(Platform_State == EPlatform_State::Regular && Platform_State.Regular == new_regular_state)
       return;
 
    if(new_regular_state == EPlatform_Substate_Regular::Normal)
    {
-      if(Platform_State == EPlatform_State::Glue)
+      switch (Platform_State)
       {
-         Platform_State.Glue = EPlatform_Substate_Glue::Finalize;
+      case EPlatform_State::Glue:
+         if(Platform_State.Glue == EPlatform_Substate_Glue::Unknown)
+            Set_Next_Or_Regular_State(new_regular_state); // State finalization finished
+         else
+            Platform_State.Glue = EPlatform_Substate_Glue::Finalize; // We start the finalization of the state
 
-         while(Ball_Set->Release_Next_Ball())
-         {
-         }
+         return;
+
+      case EPlatform_State::Expanding:
+         if(Platform_State.Expanding == EPlatform_Substate_Expanding::Unknown)
+            Set_Next_Or_Regular_State(new_regular_state);  // State finalization finished
+         else
+            Platform_State.Expanding = EPlatform_Substate_Expanding::Finalize; // We start the finalization of the state
 
          return;
       }
    }
+
    Platform_State = EPlatform_State::Regular;
    Platform_State.Regular = new_regular_state;
 }
@@ -356,30 +414,22 @@ bool AsPlatform::Has_State(EPlatform_Substate_Regular regular_state)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsPlatform::Redraw_Platform(bool update_rect)
+void AsPlatform::Redraw_Platform()
 {
-   double platform_width;
-
-   if(update_rect)
+   if(Last_Redraw_timer_Tick != AsConfig::Current_Timer_Tick)
    {
       Prev_Platform_Rect = Platform_Rect;
-
-      if (Platform_State == EPlatform_State::Rolling && Platform_State.Rolling == EPlatform_Substate_Rolling::Roll_In)
-         platform_width = (double)Circle_Size;
-      else if (Platform_State == EPlatform_State::Expanding)
-         platform_width = Expanding_Platform_Width;
-      else
-         platform_width = (double)Width;
-
-      Platform_Rect.left = (int)(X_Pos * AsConfig::D_Global_Scale);
-      Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
-      Platform_Rect.right = (int)((X_Pos + platform_width) * AsConfig::D_Global_Scale);
-      Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
-
-
-      if(Platform_State == EPlatform_State::Meltdown)
-         Prev_Platform_Rect.bottom = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale;
+      Last_Redraw_timer_Tick = AsConfig::Current_Timer_Tick;
    }
+
+   Platform_Rect.left = (int)(X_Pos * AsConfig::D_Global_Scale);
+   Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
+   Platform_Rect.right = (int)((X_Pos + Get_Current_Width()) * AsConfig::D_Global_Scale);
+   Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
+
+
+   if(Platform_State == EPlatform_State::Meltdown)
+      Prev_Platform_Rect.bottom = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale;
 
    AsConfig::Invalidate_Rect(Prev_Platform_Rect);
    AsConfig::Invalidate_Rect(Platform_Rect);
@@ -388,7 +438,7 @@ void AsPlatform::Redraw_Platform(bool update_rect)
 
 void AsPlatform::Move(bool to_left, bool key_down)
 {
-   if(! (Has_State(EPlatform_Substate_Regular::Normal) || Platform_State == EPlatform_State::Glue))
+   if(! (Has_State(EPlatform_Substate_Regular::Normal) || Platform_State == EPlatform_State::Glue || Platform_State == EPlatform_State::Expanding))
       return;
 
    if (to_left)
@@ -451,7 +501,7 @@ bool AsPlatform::Hit_By(AFalling_Letter *falling_letter)
 
 double AsPlatform::Get_Middle_Pos()
 {
-   return X_Pos + (double)Width / 2.0;
+   return X_Pos + Get_Current_Width() / 2.0;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -518,7 +568,7 @@ void AsPlatform::Act_For_Glue_State()
          else
             Platform_State.Glue = EPlatform_Substate_Glue::Active;
 
-         Redraw_Platform(false);
+         Redraw_Platform();
          break;
 
       case EPlatform_Substate_Glue::Active:
@@ -526,11 +576,17 @@ void AsPlatform::Act_For_Glue_State()
 
       case EPlatform_Substate_Glue::Finalize:
          if(Glue_Spot_Height_Ratio > Min_Glue_Spot_Height_Ratio)
+         {
             Glue_Spot_Height_Ratio -= Glue_Spot_Height_Ratio_Step;
+
+            while(Ball_Set->Release_Next_Ball())
+            {
+            }
+         }
          else
          {
-            Set_State(EPlatform_Substate_Regular::Normal);
             Platform_State.Glue = EPlatform_Substate_Glue::Unknown;
+            Set_State(EPlatform_Substate_Regular::Normal);
          }
 
          Redraw_Platform();
@@ -551,6 +607,7 @@ void AsPlatform::Act_For_Expanding_State()
       {
          Expanding_Platform_Width += Expanding_Platform_Width_Step;
          X_Pos -= Expanding_Platform_Width_Step / 2.0;
+         Correct_Platform_Pos();
       }
       else
          Platform_State.Expanding = EPlatform_Substate_Expanding::Active;
@@ -566,14 +623,15 @@ void AsPlatform::Act_For_Expanding_State()
       {
          Expanding_Platform_Width -= Expanding_Platform_Width_Step;
          X_Pos += Expanding_Platform_Width_Step / 2.0;
+         Correct_Platform_Pos();
       }
       else
       {
-         Set_State(EPlatform_Substate_Regular::Normal);
          Platform_State.Expanding = EPlatform_Substate_Expanding::Unknown;
+         Set_State(EPlatform_Substate_Regular::Normal);
       }
 
-      Redraw_Platform(false);
+      Redraw_Platform();
       break;
 
    default:
@@ -630,23 +688,6 @@ void AsPlatform::Draw_Normal_State(HDC hdc, RECT &paint_area)
    if (Normal_Platform_Image == 0 && Has_State(EPlatform_Substate_Regular::Ready))
       Get_Normal_Platform_Image(hdc);
 
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-void AsPlatform::Get_Normal_Platform_Image(HDC hdc)
-{
-   int x = (int)(X_Pos * AsConfig::D_Global_Scale);
-   int y = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
-   int offset = 0;
-
-   Normal_Platform_Image_Width = Width * AsConfig::Global_Scale;
-   Normal_Platform_Image_Height = Height * AsConfig::Global_Scale;
-
-   Normal_Platform_Image = new int[Normal_Platform_Image_Width * Normal_Platform_Image_Height];
-
-   for (int i = 0; i < Normal_Platform_Image_Height; ++i)
-      for (int j = 0; j < Normal_Platform_Image_Width; ++j)
-         Normal_Platform_Image[offset++] = GetPixel(hdc, x + j, y + i);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1042,5 +1083,70 @@ bool AsPlatform::Get_Platform_Image_Stroke_Color(int x, int y, const AColor **co
       AsConfig::Throw();
 
    return true;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Get_Normal_Platform_Image(HDC hdc)
+{
+   int x = (int)(X_Pos * AsConfig::D_Global_Scale);
+   int y = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
+   int offset = 0;
+
+   Normal_Platform_Image_Width = Normal_Width * AsConfig::Global_Scale;
+   Normal_Platform_Image_Height = Height * AsConfig::Global_Scale;
+
+   Normal_Platform_Image = new int[Normal_Platform_Image_Width * Normal_Platform_Image_Height];
+
+   for (int i = 0; i < Normal_Platform_Image_Height; ++i)
+      for (int j = 0; j < Normal_Platform_Image_Width; ++j)
+         Normal_Platform_Image[offset++] = GetPixel(hdc, x + j, y + i);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+double AsPlatform::Get_Current_Width()
+{
+   if (Platform_State == EPlatform_State::Rolling && Platform_State.Rolling == EPlatform_Substate_Rolling::Roll_In)
+      return (double)Circle_Size;
+   else if (Platform_State == EPlatform_State::Expanding)
+      return Expanding_Platform_Width;
+   else
+      return (double)Normal_Width;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AsPlatform::Correct_Platform_Pos()
+{
+   bool got_correction = false;
+   double max_platform_x = AsConfig::Max_X_Pos - Get_Current_Width() + 1;
+
+   if (X_Pos <= AsConfig::Border_X_Offset)
+   {
+      X_Pos = AsConfig::Border_X_Offset;
+      got_correction = true;
+   }
+
+   if (X_Pos >= max_platform_x)
+   {
+      X_Pos = max_platform_x;
+      got_correction = true;
+   }
+
+   return got_correction;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform::Set_Next_Or_Regular_State(EPlatform_Substate_Regular new_regular_state)
+{
+   EPlatform_State next_state;
+
+   Platform_State = EPlatform_State::Regular;
+
+   // If there is a pending state, then we will transfer it to it, and not to Regular
+   next_state = Platform_State.Get_Next_State();
+
+   if(next_state != EPlatform_State::Unknown)
+      Set_State(next_state);
+   else
+      Platform_State.Regular = new_regular_state;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
