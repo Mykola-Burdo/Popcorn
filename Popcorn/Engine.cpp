@@ -37,7 +37,7 @@ void AsEngine::Init(HWND hwnd)
    Level.Set_Current_Level(AsLevel::Level_01);
 
    //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
-   //Platform.Set_State(EPlatform_State::Expanding);
+   Platform.Set_State(EPlatform_State::Laser);
    
    Platform.Redraw_Platform();
 
