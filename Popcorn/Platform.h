@@ -83,6 +83,14 @@ enum class EPlatform_Moving_State : unsigned char
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+enum class EFigure_Type : unsigned char
+{
+   Ellipse,
+   Rectangle,
+   Round_Rect_3x
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 class AsPlatform_State
 {
 public:
@@ -104,8 +112,8 @@ public:
    EPlatform_Moving_State Moving;
 
 private:
-      EPlatform_State Current_State;
-      EPlatform_State Next_State; // We enter this state from AsPlatform::Set_State(EPlatform_Substate_Regular new_regular_state)
+   EPlatform_State Current_State;
+   EPlatform_State Next_State; // We enter this state from AsPlatform::Set_State(EPlatform_Substate_Regular new_regular_state)
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -156,8 +164,11 @@ private:
    void Draw_Expanding_Truss(HDC, RECT &, bool);
    void Draw_Laser_State(HDC , RECT &);
    void Draw_Laser_Wing(HDC, bool);
+   void Draw_Laser_Inner_Part(HDC);
    void Draw_Laser_Leg(HDC, bool);
    void Draw_Laser_Cabin(HDC);
+   void Draw_Expanding_Figure(HDC, EFigure_Type, double, double, double, double, double, double, double, double, double);
+   int Get_Expanding_Value(double, double, double);
    bool Reflect_On_Circle(double, double, double, ABall *);
    bool Get_Platform_Image_Stroke_Color(int, int, const AColor **, int &);
    void Get_Normal_Platform_Image(HDC);
@@ -190,7 +201,7 @@ private:
 
    static const double Max_Glue_Spot_Height_Ratio, Min_Glue_Spot_Height_Ratio, Glue_Spot_Height_Ratio_Step;
    static const double Max_Expanding_Platform_Width, Min_Expanding_Platform_Width, Expanding_Platform_Width_Step;
-   static const int Max_Laser_Transformation_Step = 8;
+   static const int Max_Laser_Transformation_Step = 20;
    static const int Height = 7;
    static const int Circle_Size = 7;
    static const int Normal_Platform_Inner_Width = Normal_Width - Circle_Size;

@@ -37,7 +37,7 @@ void AsEngine::Init(HWND hwnd)
    Level.Set_Current_Level(AsLevel::Level_01);
 
    //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);
-   Platform.Set_State(EPlatform_State::Laser);
+   //Platform.Set_State(EPlatform_State::Laser);
    
    Platform.Redraw_Platform();
 
@@ -253,8 +253,9 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
       Platform.Set_State(EPlatform_Substate_Regular::Normal);
       break;
 
-   //case ELetter_Type::ELT_L: // "Laser"
-   //   break;
+   case ELetter_Type::ELT_L: // "Laser"
+      Platform.Set_State(EPlatform_State::Laser);
+      break;
 
    case ELetter_Type::ELT_T: // "Three"
       Platform.Set_State(EPlatform_Substate_Regular::Normal);
