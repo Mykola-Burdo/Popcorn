@@ -104,7 +104,7 @@ class AsPlatform_Glue
 public:
    AsPlatform_Glue(AsPlatform_State &platform_state);
 
-   bool Act(EPlatform_Transformation &, AsBall_Set *, EPlatform_State &);
+   bool Act(AsBall_Set *, EPlatform_State &);
    void Draw_State(HDC, double);
    void Reset();
 
@@ -117,6 +117,33 @@ private:
    static const double Max_Glue_Spot_Height_Ratio, Min_Glue_Spot_Height_Ratio, Glue_Spot_Height_Ratio_Step;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AsPlatform_Expanding
+{
+public:
+   ~AsPlatform_Expanding();
+   AsPlatform_Expanding(AsPlatform_State &platform_state);
+
+   void Init(AColor &, AColor &, AColor &);
+   bool Act(double &, EPlatform_State &, bool &);
+   void Draw_State(HDC, double);
+   void Draw_Circle_Highlight(HDC, int, int);
+   void Reset();
+
+   double Expanding_Platform_Width;
+
+private:
+   void Draw_Expanding_Platform_Ball(HDC, double, bool);
+   void Draw_Expanding_Truss(HDC, RECT &, bool);
+
+   AsPlatform_State *Platform_State;
+   AColor *Highlight_Color, *Circle_Color, *Inner_Color; // UNO
+   AColor *Truss_Color;
+
+   static const double Max_Expanding_Platform_Width, Min_Expanding_Platform_Width, Expanding_Platform_Width_Step;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 class AsPlatform : public AHit_Checker, public AMover, public AGraphics_Object
 {
 public:
@@ -150,21 +177,17 @@ public:
    static const int Circle_Size = 7;
    static const int Height = 7;
    static const int Normal_Platform_Inner_Width = Normal_Width - Circle_Size;
+   static const int Expanding_Platform_Inner_Width = 12;
 
 private:
    bool Set_Transformation_State(EPlatform_State, EPlatform_Transformation &);
    void Act_For_Meltdown_State();
    void Act_For_Rolling_State();
-   void Act_For_Expanding_State();
    void Act_For_Laser_State();
-   void Draw_Circle_Highlight(HDC, int, int);
    void Draw_Normal_State(HDC, RECT &);
    void Draw_Meltdown_State(HDC, RECT &);
    void Draw_Rolling_State(HDC, RECT &);
    void Draw_Roll_In_State(HDC, RECT &);
-   void Draw_Expanding_State(HDC, RECT &);
-   void Draw_Expanding_Platform_Ball(HDC, bool);
-   void Draw_Expanding_Truss(HDC, RECT &, bool);
    void Draw_Laser_State(HDC , RECT &);
    void Draw_Laser_Wing(HDC, bool);
    void Draw_Laser_Inner_Part(HDC);
@@ -186,9 +209,9 @@ private:
    int Last_Redraw_timer_Tick;
    double X_Pos;
    double Speed;
-   double Expanding_Platform_Width;
    AsBall_Set *Ball_Set;
    AsPlatform_Glue Platform_Glue;
+   AsPlatform_Expanding Platform_Expanding;
 
    int Normal_Platform_Image_Width, Normal_Platform_Image_Height;
    int *Normal_Platform_Image; // Platform image pixels on background
@@ -197,11 +220,9 @@ private:
 
    RECT Platform_Rect, Prev_Platform_Rect;
 
-   AColor Highlight_Color, Platform_Circle_Color, Platform_Inner_Color, Truss_Color, Gun_Color;
+   AColor Highlight_Color, Platform_Circle_Color, Platform_Inner_Color, Gun_Color;
 
-   static const double Max_Expanding_Platform_Width, Min_Expanding_Platform_Width, Expanding_Platform_Width_Step;
    static const int Max_Laser_Transformation_Step = 20;
-   static const int Expanding_Platform_Inner_Width = 12;
    static const int Meltdown_Speed = 3;
    static const int Max_Rolling_Step = 16;
    static const int Roll_In_Platform_End_X_Pos = 99;
