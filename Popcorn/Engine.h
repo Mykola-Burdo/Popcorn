@@ -50,6 +50,7 @@ private:
    AsPlatform Platform;
    AsBorder Border;
    AsBall_Set Ball_Set;
+   AsLaser_Beam_Set Laser_Beam_Set;
 
    AMover *Movers[AsConfig::Max_Movers_Count]; // UNO; Objects currently moving
    AGraphics_Object *Modules[AsConfig::Max_Modules_Count]; // UNO; Main graphic objects (modules) of the game

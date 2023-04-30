@@ -467,6 +467,185 @@ void AsPlatform_Expanding::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool 
 
 
 
+//--------------ALaser_Beam--------------------
+
+ALaser_Beam::ALaser_Beam()
+   : Is_Active(false), X_Pos(0.0), Y_Pos(0.0), Beam_Rect{}
+{
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Begin_Movement()
+{
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Finish_Movement()
+{
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Advance(double)
+{
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+double ALaser_Beam::Get_Speed()
+{
+
+   return 0.0;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Act()
+{
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Clear(HDC hdc, RECT &paint_area)
+{
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Draw(HDC hdc, RECT &paint_area)
+{
+   int x_pos, y_pos;
+   RECT intersection_rect;
+
+   if(!IntersectRect(&intersection_rect, &paint_area, &Beam_Rect))
+      return;
+
+   AsConfig::Laser_Color.Select(hdc);
+
+   x_pos = (int)(X_Pos * AsConfig::D_Global_Scale);
+   y_pos = (int)(Y_Pos * AsConfig::D_Global_Scale);
+
+   MoveToEx(hdc, x_pos, y_pos + 1, 0);
+   LineTo(hdc, x_pos, y_pos + Height * AsConfig::Global_Scale - 1);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ALaser_Beam::Is_Finished()
+{
+
+   return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void ALaser_Beam::Set_At(double x_pos, double y_pos)
+{
+   X_Pos = x_pos;
+   Y_Pos = y_pos;
+
+   Beam_Rect.left = (int)((X_Pos - (double)Width / 2.0) * AsConfig::D_Global_Scale);
+   Beam_Rect.top = (int)(Y_Pos * AsConfig::D_Global_Scale);
+   Beam_Rect.right = Beam_Rect.left + Width * AsConfig::Global_Scale;
+   Beam_Rect.bottom = Beam_Rect.top + Height * AsConfig::Global_Scale;
+
+   AsConfig::Invalidate_Rect(Beam_Rect);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------AsLaser_Beam_Set--------------------
+
+void AsLaser_Beam_Set::Begin_Movement()
+{
+   for (int i = 0; i < Max_Laser_Beam_Count; ++i)
+      Laser_Beams[i].Begin_Movement();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLaser_Beam_Set::Finish_Movement()
+{
+   for (int i = 0; i < Max_Laser_Beam_Count; ++i)
+      Laser_Beams[i].Finish_Movement();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLaser_Beam_Set::Advance(double max_speed)
+{
+   for (int i = 0; i < Max_Laser_Beam_Count; ++i)
+      Laser_Beams[i].Advance(max_speed);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+double AsLaser_Beam_Set::Get_Speed()
+{
+   double curr_speed, max_speed = 0.0;
+
+   for (int i = 0; i < Max_Laser_Beam_Count; ++i)
+   {
+      curr_speed = Laser_Beams[i].Get_Speed();
+
+      if (curr_speed > max_speed)
+         max_speed = curr_speed;
+   }
+
+   return max_speed;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLaser_Beam_Set::Act()
+{
+   // Stub. Not used, because the rays themselves do nothing (not animated)
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLaser_Beam_Set::Clear(HDC hdc, RECT &paint_area)
+{
+   for (int i = 0; i < Max_Laser_Beam_Count; ++i)
+      Laser_Beams[i].Clear(hdc, paint_area);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLaser_Beam_Set::Draw(HDC hdc, RECT &paint_area)
+{
+   for (int i = 0; i < Max_Laser_Beam_Count; ++i)
+      Laser_Beams[i].Draw(hdc, paint_area);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AsLaser_Beam_Set::Is_Finished()
+{
+   return false; // Stub because this method is not used
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsLaser_Beam_Set::Fire(bool fire_on, double x_pos)
+{
+   ALaser_Beam *left_beam = 0, *right_beam = 0;
+
+   for(int i = 0; i < Max_Laser_Beam_Count; ++i)
+   {
+      if(Laser_Beams[i].Is_Active)
+         continue;
+
+      if(left_beam == 0)
+         left_beam = &Laser_Beams[i];
+      else
+         if(right_beam == 0)
+         {
+            right_beam = &Laser_Beams[i];
+            break;
+         }
+   }
+
+   if(left_beam == 0 || right_beam == 0)
+      AsConfig::Throw(); // Not enough free laser beams
+
+   left_beam->Set_At(x_pos + 3.0, AsConfig::Platform_Y_Pos);
+   right_beam->Set_At(x_pos + (AsPlatform::Normal_Width - 4), AsConfig::Platform_Y_Pos);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 //--------------AsPlatform_Laser--------------------
@@ -477,13 +656,14 @@ AsPlatform_Laser::~AsPlatform_Laser()
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 AsPlatform_Laser::AsPlatform_Laser(AsPlatform_State &platform_state)
-   : Laser_Transformation_Step(0), Platform_State(&platform_state), Circle_Color(0), Inner_Color(0), Gun_Color(0)
+   : Laser_Transformation_Step(0), Platform_State(&platform_state), Laser_Beam_Set(0), Circle_Color(0), Inner_Color(0), Gun_Color(0)
 {
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsPlatform_Laser::Init(AColor &highlight_color, AColor &circle_color, AColor &inner_color)
+void AsPlatform_Laser::Init(AsLaser_Beam_Set *laser_beam_set, AColor &highlight_color, AColor &circle_color, AColor &inner_color)
 {
+   Laser_Beam_Set = laser_beam_set;
    Circle_Color = &circle_color;
    Inner_Color = &inner_color;
 
@@ -561,6 +741,18 @@ void AsPlatform_Laser::Draw_State(HDC hdc, double x_pos, RECT &platform_rect)
 void AsPlatform_Laser::Reset()
 {
    Laser_Transformation_Step = 0;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsPlatform_Laser::Fire(bool fire_on, double x_pos)
+{
+   if(Platform_State->Laser != EPlatform_Transformation::Active)
+      return; // Ignore the shot until the platform is formed
+
+   if(!fire_on)
+      return;
+
+   Laser_Beam_Set->Fire(fire_on, x_pos);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -982,12 +1174,12 @@ bool AsPlatform::Is_Finished()
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-void AsPlatform::Init(AsBall_Set *ball_set)
+void AsPlatform::Init(AsBall_Set *ball_set, AsLaser_Beam_Set *laser_beam_set)
 {
    Ball_Set = ball_set;
 
    Platform_Expanding.Init(Highlight_Color, Platform_Circle_Color, Platform_Inner_Color);
-   Platform_Laser.Init(Highlight_Color, Platform_Circle_Color, Platform_Inner_Color);
+   Platform_Laser.Init(laser_beam_set, Highlight_Color, Platform_Circle_Color, Platform_Inner_Color);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1156,7 +1348,7 @@ void AsPlatform::On_Space_Key(bool key_down)
       if(Platform_State == EPlatform_State::Glue)
          Ball_Set->Release_Next_Ball();
       else if(Platform_State == EPlatform_State::Laser)
-         AsConfig::Throw();
+         Platform_Laser.Fire(key_down, X_Pos);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

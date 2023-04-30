@@ -144,16 +144,67 @@ private:
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
+class ALaser_Beam : public AMover, public AGraphics_Object
+{
+public:
+   ALaser_Beam();
+
+   virtual void Begin_Movement();
+   virtual void Finish_Movement();
+   virtual void Advance(double);
+   virtual double Get_Speed();
+
+   virtual void Act();
+   virtual void Clear(HDC, RECT &);
+   virtual void Draw(HDC, RECT &);
+   virtual bool Is_Finished();
+
+   void Set_At(double, double);
+
+   bool Is_Active;
+
+private:
+   double X_Pos, Y_Pos;
+   RECT Beam_Rect;
+
+   static const int Width = 1;
+   static const int Height = 3;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+class AsLaser_Beam_Set : public AMover, public AGraphics_Object
+{
+public:
+   virtual void Begin_Movement();
+   virtual void Finish_Movement();
+   virtual void Advance(double);
+   virtual double Get_Speed();
+
+   virtual void Act();
+   virtual void Clear(HDC, RECT &);
+   virtual void Draw(HDC, RECT &);
+   virtual bool Is_Finished();
+
+   void Fire(bool, double);
+
+private:
+   static const int Max_Laser_Beam_Count = 10;
+
+   ALaser_Beam Laser_Beams[Max_Laser_Beam_Count];
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 class AsPlatform_Laser
 {
 public:
    ~AsPlatform_Laser();
    AsPlatform_Laser(AsPlatform_State &);
 
-   void Init(AColor &, AColor &, AColor &);
+   void Init(AsLaser_Beam_Set *, AColor &, AColor &, AColor &);
    bool Act(EPlatform_State &);
    void Draw_State(HDC, double, RECT &);
    void Reset();
+   void Fire(bool, double);
 
 private:
    void Draw_Laser_Wing(HDC, double, bool);
@@ -167,6 +218,8 @@ private:
    AsPlatform_State *Platform_State;
    AColor *Circle_Color, *Inner_Color; // UNO
    AColor *Gun_Color;
+
+   AsLaser_Beam_Set *Laser_Beam_Set; // UNO 
 
    static const int Max_Laser_Transformation_Step = 20;
 };
@@ -190,7 +243,7 @@ public:
    virtual void Draw(HDC, RECT &);
    virtual bool Is_Finished();
 
-   void Init(AsBall_Set*);
+   void Init(AsBall_Set*, AsLaser_Beam_Set *);
    EPlatform_State Get_State();
    void Set_State(EPlatform_State);
    void Set_State(EPlatform_Substate_Regular);
