@@ -34,6 +34,8 @@ void AsEngine::Init(HWND hwnd)
    ABall::Add_Hit_Checker(&Level);
    ABall::Add_Hit_Checker(&Platform);
 
+   ALaser_Beam::Add_Hit_Checker(&Level);
+
    Level.Set_Current_Level(AsLevel::Level_01);
 
    //Ball.Set_State(EBall_State::EBS_Normal, Platform.X_Pos + Platform.Width / 2);

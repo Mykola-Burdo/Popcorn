@@ -15,6 +15,7 @@ public:
    AsLevel();
 
    virtual bool Check_Hit(double, double, ABall*);
+   virtual bool Check_Hit(double, double);
 
    virtual void Act();
    virtual void Clear(HDC, RECT &);

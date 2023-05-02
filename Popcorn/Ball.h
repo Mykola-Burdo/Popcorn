@@ -19,6 +19,8 @@ class AHit_Checker
 {
 public:
    virtual bool Check_Hit(double, double, ABall *) = 0;
+   virtual bool Check_Hit(double, double);
+
    bool Hit_Circle_On_Line(double, double, double, double, double, double &);
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------

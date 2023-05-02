@@ -4,7 +4,13 @@
 
 
 //--------------AHit_Checker--------------------
-bool AHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double& x)
+bool AHit_Checker::Check_Hit(double, double)
+{
+   return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+bool AHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double &x)
 {// Checks the intersection of a horizontal segment (passing from left_x to right_x through y) with a circle of radius radius
 
    double min_x, max_x;
