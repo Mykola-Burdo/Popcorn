@@ -1,30 +1,6 @@
 #pragma once
 
-#include <Windows.h>
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-class AColor
-{
-public:
-   AColor();
-   AColor(unsigned char, unsigned char, unsigned char);
-   AColor(const AColor &, int);
-   AColor(unsigned char, unsigned char, unsigned char, int);
-   AColor(const AColor &, const AColor &, int);
-
-   int Get_RGB() const;
-   void Select(HDC) const;
-   void Select_Pen(HDC) const;
-   HBRUSH Get_Brush() const;
-
-   unsigned char R, G, B;
-
-private:
-   HPEN Pen;
-   HBRUSH Brush;
-};
-//-----------------------------------------------------------------------------------------------------------------------------------------------
+#include "Tools.h"
 
 class AsConfig
 {
@@ -72,4 +48,9 @@ public:
    static const int Initial_Life_Count = 5;
    static const int Max_Life_Count = 12;
    static const int Floor_Y_Pos = Max_Y_Pos - 1;
+   static const int Platform_Normal_Width = 28;
+   static const int Platform_Circle_Size = 7;
+   static const int Platform_Height = 7;
+   static const int Platform_Normal_Inner_Width = Platform_Normal_Width - Platform_Circle_Size;
+   static const int Platform_Expanding_Inner_Width = 12;
 };

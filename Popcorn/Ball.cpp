@@ -1,62 +1,8 @@
 #include "Ball.h"
 
-
-
-
-//--------------AHit_Checker--------------------
-bool AHit_Checker::Check_Hit(double, double)
-{
-   return false;
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-bool AHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double &x)
-{// Checks the intersection of a horizontal segment (passing from left_x to right_x through y) with a circle of radius radius
-
-   double min_x, max_x;
-
-   if (y > radius)
-      return false;
-
-   x = sqrt(pow(radius, 2) - pow(y, 2));
-
-   max_x = next_x_pos + x;
-   min_x = next_x_pos - x;
-
-   if (max_x >= left_x && max_x <= right_x
-      || min_x >= left_x && min_x <= right_x)
-      return true;
-   else
-      return false;
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-//--------------AMover--------------------
-
-AMover::~AMover()
-{
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-//--------------AGraphics_Object--------------------
-AGraphics_Object::~AGraphics_Object()
-{
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
 //--------------ABall--------------------
 const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
-int ABall::Hit_Checkers_Count = 0;
-AHit_Checker *ABall::Hit_Checkers[] = {};
+AHit_Checker_List ABall::Hit_Checker_List;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 ABall::ABall()
    : Ball_State(EBall_State::EBS_Disabled), Prev_Ball_State(EBall_State::EBS_Disabled), Release_Timer_Tick(0), Center_X_Pos(0.0),
@@ -112,8 +58,7 @@ void ABall::Advance(double max_speed)
       next_y_pos = Center_Y_Pos - next_step * sin(Ball_Direction);
 
       // Correcting the position when reflected from all surfaces
-      for (int i = 0; i < Hit_Checkers_Count; ++i)
-         got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);
+      got_hit = Hit_Checker_List.Check_Hit(next_x_pos, next_y_pos, this);
 
       if (got_hit)
       {
@@ -477,15 +422,6 @@ void ABall::Release()
 
    Ball_Direction = Prev_Ball_Direction;
    Release_Timer_Tick = 0;
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-void ABall::Add_Hit_Checker(AHit_Checker *hit_checker)
-{
-   if(Hit_Checkers_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]))
-      return;
-
-   Hit_Checkers[Hit_Checkers_Count++] = hit_checker;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

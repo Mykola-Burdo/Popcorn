@@ -14,40 +14,6 @@ enum class EBall_State
    EBS_Teleporting
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------------
-class ABall;
-class AHit_Checker
-{
-public:
-   virtual bool Check_Hit(double, double, ABall *) = 0;
-   virtual bool Check_Hit(double, double);
-
-   bool Hit_Circle_On_Line(double, double, double, double, double, double &);
-};
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-class AMover
-{
-public:
-   virtual ~AMover();
-
-   virtual void Begin_Movement() = 0;
-   virtual void Finish_Movement() = 0;
-   virtual void Advance(double) = 0;
-   virtual double Get_Speed() = 0;
-};
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-class AGraphics_Object
-{
-public:
-   virtual ~AGraphics_Object();
-
-   virtual void Act() = 0;
-   virtual void Clear(HDC, RECT &) = 0;
-   virtual void Draw(HDC, RECT &) = 0;
-   virtual bool Is_Finished() = 0;
-};
-//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 class ABall : public AMover, public AGraphics_Object
 {
@@ -82,7 +48,7 @@ public:
 
    int Release_Timer_Tick; // The value of the time counter after which the glued ball must be released
 
-   static void Add_Hit_Checker(AHit_Checker *);
+   static AHit_Checker_List Hit_Checker_List;
 
    static const double Radius;
 
@@ -95,7 +61,6 @@ private:
    EBall_State Ball_State, Prev_Ball_State;
 
    double Center_X_Pos, Center_Y_Pos;
-   //double Rest_Distance;
    double Ball_Direction, Prev_Ball_Direction;
    double Ball_Speed, Prev_Ball_Speed;
 
@@ -108,6 +73,4 @@ private:
 
    static const int Parachute_Size = 15;
    static const int On_Platform_Timeout = 10 * AsConfig::FPS; // Time spent on the platform
-   static int Hit_Checkers_Count;
-   static AHit_Checker *Hit_Checkers[3];
 };
