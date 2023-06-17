@@ -1,12 +1,203 @@
 #include "Border.h"
 
+//--------------AGate--------------------
+AGate::AGate(int x_pos, int y_pos)
+   : X_Pos(x_pos), Y_Pos(y_pos), Edges_Count(5)
+{
+   int scale = AsConfig::Global_Scale;
+
+   Gate_Rect.left = X_Pos * scale;
+   Gate_Rect.top = Y_Pos * scale;
+   Gate_Rect.right = Gate_Rect.left + Width * scale;
+   Gate_Rect.bottom = Gate_Rect.top + Height * scale;
+}
+
+void AGate::Act()
+{
+   // Stub because this method is not used
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AGate::Clear(HDC hdc, RECT &paint_area)
+{
+   RECT intersection_rect;
+
+   if(!IntersectRect(&intersection_rect, &paint_area, &Gate_Rect))
+      return;
+
+   AsConfig::Rect(hdc, Gate_Rect, AsConfig::BG_Color);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AGate::Draw(HDC hdc, RECT &paint_area)
+{
+   RECT intersection_rect;
+
+   if(!IntersectRect(&intersection_rect, &paint_area, &Gate_Rect))
+      return;
+
+   Clear(hdc, paint_area);
+
+   Draw_Cup(hdc, true);
+   Draw_Cup(hdc, false);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+bool AGate::Is_Finished()
+{
+   return false;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AGate::Draw_Cup(HDC hdc, bool top_cup)
+{
+   int x = 0, y = 0;
+   int cup_y_offset;
+   const int scale = AsConfig::Global_Scale;
+   const int half_scale = scale / 2;
+   HRGN region;
+   RECT rect;
+   XFORM xform, old_xform;
+
+   xform.eM11 = 1.0f;
+   xform.eM12 = 0.0f;
+   xform.eM21 = 0.0f;
+   xform.eDx = (float)(X_Pos * scale);
+
+   if(top_cup)
+   {
+      xform.eM22 = 1.0f;
+      cup_y_offset = 0;
+   }
+   else
+   {
+      xform.eM22 = -1.0f;
+      cup_y_offset = 19 * scale - 1;
+   }
+
+   xform.eDy = (float)(Y_Pos * scale + cup_y_offset);
+
+   GetWorldTransform(hdc, &old_xform);
+   SetWorldTransform(hdc, &xform);
+
+   // Half round part of the bowl
+   rect.left = x * scale;
+   rect.top = (y + 1) * scale;
+   rect.right = rect.left + 6 * scale;
+   rect.bottom = rect.top + 4 * scale;
+
+   // Warp
+   AsConfig::Blue_Color.Select(hdc);
+   AsConfig::Round_Rect(hdc, rect, 3);
+
+   // Glare on the left
+   rect.left = X_Pos * scale;
+   rect.right = rect.left + 3 * scale;
+
+   if(top_cup)
+   {
+      rect.top = (Y_Pos + 1) * scale;
+      rect.bottom = rect.top + 4 * scale;
+   }
+   else
+   {
+      rect.top = (Y_Pos - 1) * scale + cup_y_offset + 1;
+      rect.bottom = rect.top - 4 * scale;
+   }
+
+   region = CreateEllipticRgnIndirect(&rect);
+   SelectClipRgn(hdc, region);
+
+   AsConfig::Gate_Color.Select_Pen(hdc);
+
+   rect.left = x * scale + half_scale;
+   rect.top = (y + 1) * scale + half_scale;
+   rect.right = rect.left + 5 * scale + half_scale;
+   rect.bottom = rect.top + 5 * scale + half_scale;
+
+   AsConfig::Round_Rect(hdc, rect, 3);
+
+   SelectClipRgn(hdc, 0);
+   DeleteObject(region);
+
+   // Glare from below
+   AsConfig::Rect(hdc, x, y + 4, 4, 1, AsConfig::White_Color);
+
+   // "Patch" in the lower right corner
+   AsConfig::Rect(hdc, x + 4, y + 3, 2, 2, AsConfig::Blue_Color);
+
+   // Background perforation
+   AsConfig::Rect(hdc, x + 4, y + 3, 1, 1, AsConfig::BG_Color);
+
+   // Jumper in front of the bowl
+   AsConfig::Rect(hdc, x + 2, y, 2, 1, AsConfig::Blue_Color);
+
+   Draw_Edges(hdc);
+
+   SetWorldTransform(hdc, &old_xform);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+ void AGate::Draw_Edges(HDC hdc)
+ {
+   bool is_long_edge = false;
+
+   for(int i = 0; i < Edges_Count; ++i)
+   {
+      Draw_One_Edge(hdc, 5 + i, is_long_edge);
+      is_long_edge = !is_long_edge;
+   }
+ }
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+ void AGate::Draw_One_Edge(HDC hdc, int edge_y_offset, bool long_edge)
+ {
+    if(long_edge)
+    {// Long edge
+
+       AsConfig::Rect(hdc, 0, edge_y_offset, 4, 1, AsConfig::White_Color);
+       AsConfig::Rect(hdc, 4, edge_y_offset, 2, 1, AsConfig::Blue_Color);
+    }
+    else
+    {
+       AsConfig::Rect(hdc, 1, edge_y_offset, 2, 1, AsConfig::Blue_Color);
+       AsConfig::Rect(hdc, 4, edge_y_offset, 1, 1, AsConfig::Blue_Color);
+    }
+ }
+ //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 //--------------AsBorder--------------------
+ AsBorder::~AsBorder()
+{
+   for(int i = 0; i < AsConfig::Gates_Count; ++i)
+      delete Gates[i];
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
 AsBorder::AsBorder()
+   : Floor_Rect{}, Gates{}
 {
    Floor_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
    Floor_Rect.top = AsConfig::Floor_Y_Pos * AsConfig::Global_Scale;
    Floor_Rect.right = (AsConfig::Max_X_Pos - 1) * AsConfig::Global_Scale;
    Floor_Rect.bottom = AsConfig::Max_Y_Pos * AsConfig::Global_Scale;
+
+   // Gates
+   Gates[0] = new AGate(1, 29);
+   Gates[1] = new AGate(AsConfig::Max_X_Pos, 29);
+
+   Gates[2] = new AGate(1, 77);
+   Gates[3] = new AGate(AsConfig::Max_X_Pos, 77);
+
+   Gates[4] = new AGate(1, 129);
+   Gates[5] = new AGate(AsConfig::Max_X_Pos, 129);
+
+   Gates[6] = new AGate(1, 178);
+   Gates[7] = new AGate(AsConfig::Max_X_Pos, 178);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -90,6 +281,7 @@ void AsBorder::Draw(HDC hdc, RECT &paint_area)
    // Draw the right border
    for (int i = 0; i < 50; ++i)
       Draw_Element(hdc, paint_area, AsConfig::Max_X_Pos + 1, 1 + i * 4, false);
+   
 
    // Draw the top border
    for (int i = 0; i < 50; ++i)
@@ -98,6 +290,10 @@ void AsBorder::Draw(HDC hdc, RECT &paint_area)
    // Floor (if any)
    if (AsConfig::Level_Has_Floor)
       Draw_Floor(hdc, paint_area);
+
+   // Gates
+   for(int i = 0; i < AsConfig::Gates_Count; ++i)
+      Gates[i]->Draw(hdc, paint_area);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

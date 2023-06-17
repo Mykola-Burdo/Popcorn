@@ -10,6 +10,7 @@ const AColor AsConfig::Blue_Color(85, 255, 255);
 const AColor AsConfig::White_Color(255, 255, 255);
 const AColor AsConfig::Letter_Color(AsConfig::White_Color, AsConfig::Global_Scale);
 const AColor AsConfig::Laser_Color(AsConfig::White_Color, AsConfig::Global_Scale);
+const AColor AsConfig::Gate_Color(AsConfig::White_Color, AsConfig::Global_Scale);
 const AColor AsConfig::Unbreakable_Blue_Highlight(AsConfig::Blue_Color, AsConfig::Global_Scale);
 const AColor AsConfig::Unbreakable_Red_Highlight(AsConfig::Red_Color, 3 * AsConfig::Global_Scale);
 const AColor AsConfig::Teleport_Portal_Color(AsConfig::Blue_Color, AsConfig::BG_Color, AsConfig::Global_Scale);
@@ -38,7 +39,20 @@ void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_radius)
    int radius = corner_radius * AsConfig::Global_Scale;
 
    RoundRect(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1, radius, radius);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
+void AsConfig::Rect(HDC hdc, RECT &rect, const AColor &color)
+{
+   color.Select(hdc);
+   Rectangle(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AsConfig::Rect(HDC hdc, int x, int y, int width, int height, const AColor &color)
+{
+   color.Select(hdc);
+   Rectangle(hdc, x * Global_Scale, y * Global_Scale, (x + width) * Global_Scale - 1, (y + height) * Global_Scale - 1);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 

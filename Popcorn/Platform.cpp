@@ -788,11 +788,12 @@ double AsPlatform::Get_Current_Width()
 bool AsPlatform::Correct_Platform_Pos()
 {
    bool got_correction = false;
-   double max_platform_x = AsConfig::Max_X_Pos - Get_Current_Width() + 1;
+   double min_platform_x = AsConfig::Border_X_Offset + 1;
+   double max_platform_x = AsConfig::Max_X_Pos - Get_Current_Width();
 
-   if (X_Pos <= AsConfig::Border_X_Offset)
+   if (X_Pos <= min_platform_x)
    {
-      X_Pos = AsConfig::Border_X_Offset;
+      X_Pos = min_platform_x;
       got_correction = true;
    }
 
